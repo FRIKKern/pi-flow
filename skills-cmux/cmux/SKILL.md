@@ -53,4 +53,4 @@ Or `/pi-flow-cmux-layout` inside Pi.
 
 - `docs/CMUX.md` · `lib/cmux-reference.md`
 - `/skill:cmux-browser` — interactive browser flows
-- `pi-flow.cmux-advisor` — read-only debug
+- `/pi-flow-doctor` — read-only debug

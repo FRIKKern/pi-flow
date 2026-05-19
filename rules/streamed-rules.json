@@ -1,0 +1,31 @@
+{
+  "rules": [
+    {
+      "id": "skip-grill",
+      "pattern": "skip grill|skipping grill|--skip-grill",
+      "message": "[pi-flow] Grill is mandatory in plan/autopilot unless the user explicitly passed --skip-grill. Pause for browser Submit or structured answers.",
+      "oncePerSession": true
+    },
+    {
+      "id": "done-without-verify",
+      "pattern": "\\b(plan|grill|goal) (is )?done\\b|\\bready to (ship|merge)\\b",
+      "flags": "i",
+      "message": "[pi-flow] Before claiming done on HTML artifacts: run paperflow_verify on the doc URL (or document SKIP).",
+      "oncePerSession": true
+    },
+    {
+      "id": "force-push",
+      "pattern": "git push.*--force|push --force",
+      "flags": "i",
+      "message": "[pi-flow] Force-push requires explicit user approval. Never assume.",
+      "oncePerSession": true
+    },
+    {
+      "id": "inline-large-code",
+      "pattern": "I'll (implement|write|add).{0,40}(entire|whole|all) (file|module|component)",
+      "flags": "i",
+      "message": "[pi-flow] >30 LOC → dispatch worker subagent. See lib/paperflow-thresholds.md.",
+      "oncePerSession": true
+    }
+  ]
+}

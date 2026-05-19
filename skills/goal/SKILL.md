@@ -1,38 +1,30 @@
 ---
 name: goal
 description: >-
-  pi-flow · paperflow goal. Use when the user says "start a goal", "open a goal for X",
-  "snapshot the goal", "archive the goal", "resume goal", or starts non-trivial multi-artifact work.
-  Creates Beads epic + three phases, .paperflow pointers, Goal HTML.
+  pi-flow · Open/archive/resume a paperflow Goal. Beads epic, phases, pointers, Goal HTML.
+pipeline: [goal, plan, build, review]
 ---
 
-# goal (pi-flow)
+# goal
 
-Pi-port av [paperflow goal](https://github.com/FRIKKern/paperflow/blob/main/skills/goal/SKILL.md). Orchestrator følger `lib/paperflow-thresholds.md`.
+Orchestrator: `lib/orchestrator.md`.
 
-## Step 0 — Host
+## Preflight
 
-1. **`paperflow_host`** `{ action: "ensure" }` — start/check daemon :8767
-2. Optional shell: `paperflow-preflight` (abort on critical)
+1. `paperflow_host` `{ action: "ensure" }`
+2. Optional: `paperflow-preflight` — abort on critical
 
-Pi-only uten host: hopp over verify/auto-open, bruk `docs/paperflow/` fallback. Se `docs/HOST.md`.
+## Open goal
 
-## Åpne Goal
-
-1. **bd-keeper** (eller orchestrator inline): epic + `phase-pre-flight` / `phase-build` / `phase-review`
-2. Pointers: `.paperflow/active-goal`, `.paperflow/active-phase` — eller kall **`paperflow_active_goal`**
-3. **doc-writer**: `~/docs/paperflow/goals/<slug>/index.html` — se `lib/paperflow-paths.md`
-4. **CMUX**: `cmux browser open` på :8767 URL når daemon kjører
+1. **`pi-flow.bd-keeper`** — epic + three phase-tasks
+2. Pointers `.paperflow/active-goal` + `active-phase` (or `paperflow_active_goal`)
+3. **`pi-flow.doc-writer`** — Goal HTML
+4. Host auto-opens in cmux when daemon runs
 
 ## Sub-actions
 
-| Action | Hva |
-|--------|-----|
-| snapshot | Refresh Goal HTML |
-| resume | `bd list --type epic` → flip pointers |
-| archive | `bd epic close` etter review |
-
-## Agents
-
-- `pi-flow.bd-keeper` — bd only
-- `pi-flow.doc-writer` — HTML only
+| Action | Agent |
+|--------|--------|
+| snapshot | `pi-flow.doc-writer` |
+| resume | `pi-flow.bd-keeper` + pointers |
+| archive | `pi-flow.bd-keeper` after review |

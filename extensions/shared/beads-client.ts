@@ -1,18 +1,21 @@
-import { readActiveGoalContext } from "./paperflow-client.ts";
+import { resolveBdCommand } from "./deps.ts";
 import { runCommand } from "./exec.ts";
+import { readActiveGoalContext } from "./paperflow-client.ts";
+import { resolvePackageRoot } from "./package-root.ts";
 
-export async function runBd(
+const packageRoot = resolvePackageRoot(import.meta.url);
+
+async function runBd(
 	args: string[],
 	cwd = process.cwd(),
 ): Promise<{ ok: true; stdout: string } | { ok: false; error: string }> {
-	const result = await runCommand("bd", args, { cwd, timeout: 60_000 });
+	const { cmd, argsPrefix } = resolveBdCommand(packageRoot);
+	const result = await runCommand(cmd, [...argsPrefix, ...args], { cwd, timeout: 60_000 });
 	if (!result.ok) {
-		return {
-			ok: false,
-			error: result.error.includes("ENOENT")
-				? "bd not found — install beads: brew install beads"
-				: result.error,
-		};
+		const hint = result.error.includes("ENOENT")
+			? "bd not found — run /pi-flow-setup or: npm install -g @beads/bd"
+			: result.error;
+		return { ok: false, error: hint };
 	}
 	return { ok: true, stdout: result.stdout };
 }

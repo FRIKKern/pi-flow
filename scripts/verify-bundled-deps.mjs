@@ -6,6 +6,7 @@ const root = join(import.meta.dirname, "..");
 const required = [
 	"node_modules/pi-subagents/src/extension/index.ts",
 	"node_modules/pi-mcp-adapter/index.ts",
+	"node_modules/@beads/bd/bin/bd.js",
 ];
 
 const optional = ["node_modules/pi-cursor-provider/index.ts"];

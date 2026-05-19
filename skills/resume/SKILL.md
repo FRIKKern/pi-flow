@@ -1,17 +1,15 @@
 ---
 name: resume
 description: >-
-  pi-flow · paperflow resume. Use for "/resume", "list goals", "switch to goal X".
-  Lists Beads epics; on pick, updates .paperflow pointers only (no bd mutation).
+  pi-flow · List Goals and switch active-goal/active-phase pointers.
 ---
 
-# resume (pi-flow)
+# resume
 
-Port av [paperflow resume](https://github.com/FRIKKern/paperflow/blob/main/skills/resume/SKILL.md).
+1. **`pi-flow.bd-keeper`** or orchestrator: `bd list` epics / phases
+2. User picks → write `.paperflow/active-goal` + `active-phase`
+3. `paperflow_active_goal` to confirm
+4. Offer `/skill:plan` or `/skill:build` based on phase state
+5. Long context → `/pi-flow-handoff` with a one-line focus
 
-## Process
-
-1. `bd list --type epic --json`
-2. Numbered menu for user
-3. Write `.paperflow/active-goal` + `active-phase` (first incomplete phase)
-4. Open Goal HTML in cmux browser if paperflow host available
+See also `goal` resume sub-action.

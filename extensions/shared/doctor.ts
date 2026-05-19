@@ -1,9 +1,11 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { resolveBdCommand } from "./deps.ts";
 import { checkPaperflowHost } from "./host-manager.ts";
 import { cmuxDetectJson, isInCmux } from "./paperflow-client.ts";
 import { PAPERFLOW_BIN } from "./paths.ts";
 import { commandExists, runCommand } from "./exec.ts";
+import { loadStreamedRules } from "./streamed-rules.ts";
 
 export interface DoctorCheck {
 	name: string;
@@ -18,6 +20,23 @@ export async function runPiFlowDoctor(
 	const checks: DoctorCheck[] = [];
 
 	checks.push(await checkCommand("pi", ["--version"], "Pi CLI"));
+
+	const bd = resolveBdCommand(packageRoot);
+	const bdVer = await runCommand(bd.cmd, [...bd.argsPrefix, "--version"], { timeout: 10_000 });
+	checks.push({
+		name: "beads (bd)",
+		status: bdVer.ok ? "pass" : "fail",
+		detail: bdVer.ok ? (bdVer.stdout.split("\n")[0] ?? "ok") : "run /pi-flow-install-deps",
+	});
+
+	const beadsDir = path.join(cwd, ".beads");
+	checks.push({
+		name: "beads repo (.beads/)",
+		status: fs.existsSync(beadsDir) ? "pass" : "warn",
+		detail: fs.existsSync(beadsDir) ? "initialized" : "run /pi-flow-setup in project root",
+	});
+
+	checks.push(await checkCommand("jq", ["--version"], "jq"));
 	checks.push(checkBundled(packageRoot, "pi-subagents"));
 	checks.push(checkBundled(packageRoot, "pi-mcp-adapter"));
 	checks.push(optionalBundled(packageRoot, "pi-cursor-provider"));
@@ -37,7 +56,14 @@ export async function runPiFlowDoctor(
 		status: isInCmux(cmux) ? "pass" : "warn",
 		detail: isInCmux(cmux)
 			? `ready (${String(cmux?.workspace ?? process.env.CMUX_WORKSPACE_ID ?? "").slice(0, 12)}…)`
-			: "not detected",
+			: "not detected — optional; see docs/CMUX.md",
+	});
+
+	const rules = loadStreamedRules(cwd);
+	checks.push({
+		name: "streamed lifecycle rules",
+		status: rules.length > 0 ? "pass" : "warn",
+		detail: `${rules.length} rule(s) — bundled + .pi-flow/streamed-rules.json`,
 	});
 
 	if (commandExists(PAPERFLOW_BIN.preflight())) {
@@ -66,7 +92,7 @@ export async function runPiFlowDoctor(
 		status: fs.existsSync(goalFile) ? "pass" : "skip",
 		detail: fs.existsSync(goalFile)
 			? fs.readFileSync(goalFile, "utf8").trim()
-			: "none",
+			: "none — /skill:goal",
 	});
 
 	const agentsDir = path.join(cwd, ".pi", "agents", "pi-flow");
@@ -76,6 +102,15 @@ export async function runPiFlowDoctor(
 		detail: fs.existsSync(agentsDir)
 			? `${fs.readdirSync(agentsDir).filter((f) => f.endsWith(".md")).length} in .pi/agents/pi-flow/`
 			: "run /pi-flow-setup",
+	});
+
+	const policyEnv = process.env.PI_FLOW_ALLOW_DESTRUCTIVE === "1";
+	checks.push({
+		name: "runtime policy",
+		status: policyEnv ? "warn" : "pass",
+		detail: policyEnv
+			? "PI_FLOW_ALLOW_DESTRUCTIVE=1 — destructive shell/git allowed"
+			: "blocks rm -rf, force-push, reset --hard; redacts secrets in tool output",
 	});
 
 	return checks;
@@ -90,8 +125,9 @@ export function formatDoctorReport(checks: DoctorCheck[]): string {
 	}
 	lines.push(
 		"",
-		"Tools: paperflow_host · paperflow_verify · paperflow_beads · paperflow_cmux",
-		"Docs: docs/BEST-PRACTICES.md · docs/HOST.md",
+		"Full dashboard: /pi-flow-status",
+		"Tools: paperflow_host · paperflow_verify · paperflow_beads · paperflow_cmux · paperflow_active_goal",
+		"Docs: docs/BEST-PRACTICES.md · docs/HOST.md · docs/EDITING.md",
 	);
 	return lines.join("\n");
 }
@@ -114,7 +150,7 @@ function checkBundled(packageRoot: string, pkg: string): DoctorCheck {
 	return {
 		name: pkg,
 		status: fs.existsSync(entry) ? "pass" : "warn",
-		detail: fs.existsSync(entry) ? "bundled" : "missing",
+		detail: fs.existsSync(entry) ? "bundled" : "missing — run npm install in pi-flow package",
 	};
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "pi-flow",
-  "version": "0.6.0",
+  "version": "0.8.0",
   "description": "Paperflow lifecycle in Pi (CMUX): goal → plan → grill → build → review. HTML artifacts, Beads, MCP subagents. Model-agnostic; Composer 2.5 default.",
   "type": "module",
   "license": "MIT",
@@ -30,6 +30,7 @@
     "skills-cmux/",
     "docs/",
     "lib/",
+    "rules/",
     "AGENTS.md",
     "README.md",
     "LICENSE",
@@ -60,6 +61,7 @@
     ]
   },
   "dependencies": {
+    "@beads/bd": "^1.0.4",
     "pi-cursor-provider": "^0.1.11",
     "pi-mcp-adapter": "^2.6.1",
     "pi-subagents": "^0.24.3",

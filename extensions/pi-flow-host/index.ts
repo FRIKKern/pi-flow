@@ -1,3 +1,4 @@
+import * as fs from "node:fs";
 import * as path from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
@@ -5,18 +6,30 @@ import { bdEnsureRepo, bdReady, bdShow } from "../shared/beads-client.ts";
 import { PI_FLOW_STATE_TYPE } from "../shared/constants.ts";
 import { checkPaperflowHost, ensurePaperflowHost } from "../shared/host-manager.ts";
 import {
-	cmuxBrowserOpen,
-	cmuxDetectJson,
-	isInCmux,
+	evaluateToolCall,
+	loadPolicyConfig,
+	redactToolResultContent,
+} from "../shared/policy.ts";
+import {
 	readActiveGoalContext,
 	registerPiFlowSession,
 	verifyPaperflowDoc,
 	writeActiveGoalPointers,
+	cmuxBrowserOpen,
+	cmuxDetectJson,
+	isInCmux,
 } from "../shared/paperflow-client.ts";
 import { resolvePackageRoot } from "../shared/package-root.ts";
+import { loadMergedPiSettings } from "../shared/settings-loader.ts";
+import {
+	extractLastAssistantText,
+	loadStreamedRules,
+	StreamedRuleSession,
+} from "../shared/streamed-rules.ts";
 
 const packageRoot = resolvePackageRoot(import.meta.url);
 const cmuxSkillsDir = path.join(packageRoot, "skills-cmux");
+const lifecycleSkillsDir = path.join(packageRoot, "skills");
 
 function restoreWorkflowState(
 	pi: ExtensionAPI,
@@ -32,7 +45,21 @@ function restoreWorkflowState(
 	}
 }
 
+function countSkillDirs(dir: string): number {
+	try {
+		return fs
+			.readdirSync(dir, { withFileTypes: true })
+			.filter((d) => d.isDirectory() && fs.existsSync(path.join(dir, d.name, "SKILL.md"))).length;
+	} catch {
+		return 0;
+	}
+}
+
 export default function piFlowHost(pi: ExtensionAPI): void {
+	const settings = loadMergedPiSettings();
+	const policyConfig = loadPolicyConfig(settings);
+	const streamedRules = new StreamedRuleSession(loadStreamedRules(process.cwd()));
+
 	pi.on("session_start", async (_event, ctx) => {
 		try {
 			restoreWorkflowState(pi, ctx.sessionManager);
@@ -73,6 +100,50 @@ export default function piFlowHost(pi: ExtensionAPI): void {
 				display: false,
 			},
 		};
+	});
+
+	// Policy layer (oh-my-pi tool_call / tool_result pattern)
+	pi.on("tool_call", async (event) => {
+		if (process.env.PI_FLOW_ALLOW_DESTRUCTIVE === "1") return;
+		const block = evaluateToolCall(
+			{ toolName: event.toolName, input: event.input as Record<string, unknown> },
+			policyConfig,
+		);
+		if (block) return block;
+	});
+
+	pi.on("tool_result", async (event) => {
+		if (event.isError || !policyConfig.redactSecrets) return;
+		const content = event.content as Array<{ type: string; text?: string }>;
+		const redacted = redactToolResultContent(content, policyConfig);
+		if (redacted) return { content: redacted };
+	});
+
+	// Streamed lifecycle rules (TTSR-inspired, one-shot per session)
+	pi.on("agent_end", async (_event, ctx) => {
+		const entries = ctx.sessionManager.getEntries() as Array<{
+			type: string;
+			role?: string;
+			content?: unknown;
+		}>;
+		const text = extractLastAssistantText(entries);
+		if (!text) return;
+
+		const rule = streamedRules.matchAssistantText(text);
+		if (!rule) return;
+
+		try {
+			pi.sendMessage(
+				{
+					customType: "pi-flow-streamed-rule",
+					content: rule.message,
+					display: true,
+				},
+				{ deliverAs: "followUp" },
+			);
+		} catch {
+			ctx.ui.notify(rule.message, "warning");
+		}
 	});
 
 	pi.registerTool({
@@ -159,16 +230,44 @@ export default function piFlowHost(pi: ExtensionAPI): void {
 	pi.registerTool({
 		name: "paperflow_active_goal",
 		label: "Active goal pointers",
-		description: "Read .paperflow/active-goal and active-phase.",
-		parameters: Type.Object({}),
-		async execute() {
-			const goal = readActiveGoalContext(process.cwd());
+		description:
+			"Read or set .paperflow/active-goal and active-phase. action=read|set (set requires goalId).",
+		parameters: Type.Object({
+			action: Type.Optional(Type.Union([Type.Literal("read"), Type.Literal("set")])),
+			goalId: Type.Optional(Type.String()),
+			phaseId: Type.Optional(Type.String()),
+		}),
+		async execute(_id, params) {
+			const cwd = process.cwd();
+			const action = params.action ?? "read";
+
+			if (action === "set") {
+				if (!params.goalId?.trim()) {
+					return {
+						content: [{ type: "text", text: "FAIL: goalId required for set" }],
+						isError: true,
+						details: {},
+					};
+				}
+				writeActiveGoalPointers(cwd, params.goalId, params.phaseId);
+				pi.appendEntry(PI_FLOW_STATE_TYPE, {
+					goalId: params.goalId,
+					phaseId: params.phaseId ?? null,
+				});
+				const goal = readActiveGoalContext(cwd);
+				return {
+					content: [{ type: "text", text: goal?.summary ?? "Pointers updated." }],
+					details: goal ?? {},
+				};
+			}
+
+			const goal = readActiveGoalContext(cwd);
 			if (!goal) {
 				return {
 					content: [
 						{
 							type: "text",
-							text: "No active goal. Run /skill:goal or paperflow_active_goal with set.",
+							text: "No active goal. Run /skill:goal or paperflow_active_goal set.",
 						},
 					],
 					details: {},
@@ -185,19 +284,28 @@ export default function piFlowHost(pi: ExtensionAPI): void {
 		name: "paperflow_beads",
 		label: "Beads (bd)",
 		description:
-			"Thin bd wrapper. action=ready|show|ensure_repo. Mutations stay with pi-flow.bd-keeper subagent.",
+			"Thin bd wrapper. action=ready|show|ensure_repo|sync_todo. Mutations stay with pi-flow.bd-keeper.",
 		parameters: Type.Object({
 			action: Type.Union([
 				Type.Literal("ready"),
 				Type.Literal("show"),
 				Type.Literal("ensure_repo"),
+				Type.Literal("sync_todo"),
 			]),
 			id: Type.Optional(Type.String({ description: "Required for show" })),
 		}),
 		async execute(_id, params) {
 			const cwd = process.cwd();
-			if (params.action === "ready") {
+			if (params.action === "ready" || params.action === "sync_todo") {
 				const r = await bdReady(cwd);
+				if (r.ok && params.action === "sync_todo") {
+					pi.appendEntry(PI_FLOW_STATE_TYPE, {
+						goalId: readActiveGoalContext(cwd)?.goalId,
+						phaseId: readActiveGoalContext(cwd)?.phaseId,
+						lastReadySnapshot: r.stdout.slice(0, 4000),
+						syncedAt: Date.now(),
+					});
+				}
 				return {
 					content: [{ type: "text", text: r.ok ? r.stdout : r.error }],
 					details: {},

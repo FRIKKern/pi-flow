@@ -1,74 +1,69 @@
 # pi-flow best practices
 
-How pi-flow maps Pi ecosystem patterns to paperflow — and what we **do not** copy from Claude Code installs.
+Adopted patterns from [oh-my-pi](https://github.com/can1357/oh-my-pi) (OMP), scoped to paperflow — not a feature dump.
 
-## Layer model
-
-```text
-Extension (TS)     → wires, tools, host ensure, session register
-Skills (SKILL.md)  → goal → plan → grill → build → review playbooks
-Agents (*.md)      → doc-writer, bd-keeper, worker, … (pi-subagents)
-paperflow host     → daemon :8767, HTML, grill bridge (external install)
-```
-
-## Do
-
-| Practice | pi-flow |
-|----------|---------|
-| **Few focused tools** | `paperflow_host`, `paperflow_verify`, `paperflow_beads`, `paperflow_cmux`, `paperflow_active_goal` |
-| **Skills for workflow** | Lifecycle stays markdown — easy to diff and grill |
-| **Subagents for scope** | >30 LOC / >50 prose → delegate per `lib/paperflow-thresholds.md` |
-| **Project agents** | `.pi/agents/pi-flow/` symlinks on `/pi-flow-setup` |
-| **Conditional skills** | `skills-cmux/` only when cmux detected |
-| **Fail open** | Host/cmux missing → SKIP/warn, Pi keeps working |
-| **Single settings source** | `settings/defaults.json` merged by setup |
-| **Live doctor** | `/pi-flow-doctor` runs real checks, not static text |
-| **External daemon** | `paperflow_host ensure` — see [HOST.md](./HOST.md) |
-
-## Do not (paperflow anti-patterns in Pi)
-
-| Avoid | Instead |
-|-------|---------|
-| Bash-heavy skills when a tool exists | Call `paperflow_verify`, not raw `paperflow-doc-verify` prose |
-| Copy Claude Code hooks into Pi | Pi tools + cmux; hooks stay in paperflow install |
-| Embed `paperflow-daemon` in extension | `paperflow_host` delegates to spawn/launchd |
-| Global agent copy only | Prefer `.pi/agents/pi-flow/` symlinks |
-| Duplicate defaults in TS + JSON | Only `settings/defaults.json` |
-| `pf` CLI in Pi skills | `/skill:goal` etc. |
-| Manual `cmux browser open` after every write | Trust auto-open when host is up |
-| Reimplement grill Submit in TUI | Browser grill + daemon bridge |
-| 15 micro-extensions | Two: `pi-flow-setup` + `pi-flow-host` |
-
-## Tool cheat sheet (orchestrator)
+## The stack (final)
 
 ```text
-paperflow_host({ action: "ensure" })     # before plan/grill in cmux
-paperflow_active_goal()                  # pointers
-paperflow_verify({ url, kind: "plan" })  # after doc-writer
-paperflow_beads({ action: "ready" })     # before build loop
-paperflow_cmux({ action: "detect" })     # am I in cmux?
+Skills (6)     goal · plan · build · review · autopilot · resume
+Router         pi-flow
+CMUX skills    cmux · cmux-browser (when detected)
+pi-flow agents doc-writer · bd-keeper · cmux-verifier  (3 only)
+Subagents      worker · reviewer · oracle · planner · scout · researcher
+Host           paperflow-daemon :8767 (external)
+Runtime        policy hooks · streamed rules · /pi-flow-status
 ```
 
-Mutating `bd create/close/claim` → **`pi-flow.bd-keeper`** subagent only.
+We deliberately **do not** ship 10+ custom agents like OMC or 15 meta-skills like Superpowers.
 
-## Bundled Pi packages
+## OMP patterns we implemented
 
-| Package | Role |
-|---------|------|
-| `pi-subagents` | Delegation — do not wrap with custom spawn |
-| `pi-mcp-adapter` | MCP for scout/researcher |
-| `pi-cursor-provider` | **Optional** — Composer 2.5 default |
+| Pattern | pi-flow surface |
+|---------|-----------------|
+| Extension `tool_call` / `tool_result` policy | `extensions/shared/policy.ts` · `pi-flow-host` |
+| Streamed lifecycle rules (TTSR-inspired) | `rules/streamed-rules.json` · `agent_end` in host |
+| Model roles per phase | `settings/defaults.json` → `piFlow.modelRoles` |
+| Lazy skills | `lib/lazy-skills.md` · router skill |
+| Unified status dashboard | `/pi-flow-status` |
+| Session handoff | `/pi-flow-handoff` |
+| Subagent isolation + MCP matrix | `lib/subagents-policy.md` · `subagents.isolation` |
+| Beads ↔ session sync | `paperflow_beads` `sync_todo` |
+| Hashline + LSP | `docs/EDITING.md` (use OMP-capable runtime) |
 
-## Session state
+## Orchestrator
 
-`pi.appendEntry("pi-flow-workflow", …)` stores last-known goal/phase for restore on reload. Source of truth remains Beads + `.paperflow/active-*` files.
+Read `lib/orchestrator.md` before coordinating. Read `lib/paperflow-thresholds.md` before writing code or HTML inline.
 
-## Upstream
+## Commands
 
-When paperflow changes, update:
+| Command | Purpose |
+|---------|---------|
+| `/pi-flow-setup` | Install settings, agents, deps, host |
+| `/pi-flow-status` | Doctor + policy + skills + model roles |
+| `/pi-flow-doctor` | Health checks only |
+| `/pi-flow-handoff [focus]` | New session with goal context |
+| `/pi-flow-update` | Package + deps refresh |
 
-1. `lib/paperflow-thresholds.md` (from `shared-thresholds.md`)
-2. Skills if phase semantics change
-3. `paperflow_host` spawn paths if install layout changes
+## Install
 
-Do not fork daemon code into pi-flow.
+One command: `scripts/quickstart.sh` — Pi, bd, jq, pi-flow, paperflow host.
+
+Update: `scripts/update.sh` or `/pi-flow-update` inside Pi.
+
+## Custom streamed rules
+
+Copy and edit:
+
+```text
+.pi-flow/streamed-rules.json
+```
+
+Same schema as bundled `rules/streamed-rules.json`.
+
+## Policy override (dangerous)
+
+```bash
+export PI_FLOW_ALLOW_DESTRUCTIVE=1
+```
+
+Allows destructive git/shell that pi-flow normally blocks. Use only with explicit user approval.

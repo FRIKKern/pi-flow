@@ -1,60 +1,44 @@
 # pi-flow — paperflow in CMUX
 
-Pi-distribusjon for **[cmux](https://github.com/manaflow-ai/cmux)** + **[paperflow](https://github.com/FRIKKern/paperflow)**. **Cursor/Composer 2.5** er valgfri standardmodell — ikke produktnavnet.
+**Simple stack:** 6 lifecycle skills · **3 pi-flow agents** · pi-subagents builtins · external paperflow host.
 
-## CMUX is the runtime (read first)
-
-```text
-Terminal surface [Pi]  +  Browser surface [:8767/paperflow/]  +  Dock feeds
-```
-
-| Doc | Content |
-|-----|---------|
-| **`docs/CMUX.md`** | Full CMUX expert reference |
-| `lib/cmux-reference.md` | Cheat sheet |
-| `/skill:cmux` | Orchestrator CMUX playbook |
-| `/skill:cmux-browser` | Doc verify + browser automation |
-
-**Session start:** `pi-flow-host` registers with paperflow-daemon so grill **Submit** → `cmux send` → Pi pane.
-
-**Tools:** `paperflow_host` · `paperflow_verify` · `paperflow_cmux` · `paperflow_beads` · `paperflow_active_goal`
-
-**Outside cmux:** degraded mode (chat grill, SKIP verify) — still works, not target experience.
-
-## Lifecycle (paperflow)
+## Lifecycle
 
 ```text
-/skill:goal → /skill:plan → grill pause → revise → /skill:build → /skill:review
+/skill:goal → /skill:plan → grill → revise → /skill:build → /skill:review
 ```
 
-- HTML artifacts: `~/docs/paperflow/…`
-- Beads + `.paperflow/active-{goal,phase}`
-- `lib/paperflow-thresholds.md`
+Or `/skill:autopilot "vision"`. Router: `/skill:pi-flow` · policy: `lib/orchestrator.md`.
 
-## Skills
+## Agents
 
-| Skill | Role |
-|-------|------|
-| `goal` `plan` `build` `review` `autopilot` `resume` | paperflow lifecycle |
-| `cmux` `cmux-browser` | CMUX layout, verify, bridge (auto-loaded in cmux) |
-| `pi-flow` | Overview |
+| pi-flow only (3) | Role |
+|------------------|------|
+| `pi-flow.doc-writer` | HTML artifacts |
+| `pi-flow.bd-keeper` | Beads + pointers |
+| `pi-flow.cmux-verifier` | One-shot doc verify |
 
-## Agents (`pi-flow.*`)
+| pi-subagents (builtins) | Role |
+|-------------------------|------|
+| `worker` | Implement |
+| `reviewer` | Review |
+| `oracle` | Second opinion |
+| `planner` | Implementation plan |
+| `scout` · `researcher` | Recon · web/MCP |
 
-| Agent | Role |
-|-------|------|
-| `doc-writer` | HTML plans/grills |
-| `bd-keeper` | Beads only |
-| `cmux-verifier` | `paperflow-doc-verify` one-liner |
-| `cmux-advisor` | CMUX debug (read-only) |
-| `scout` `researcher` | MCP research |
-| `worker` `reviewer` `oracle` | build / review |
+## Tools
 
-## Commands
+`paperflow_host` · `paperflow_verify` · `paperflow_beads` · `paperflow_cmux` · `paperflow_active_goal`
 
-- `/pi-flow-setup` `/pi-flow-doctor` `/pi-flow-cmux-layout`
-- `/mcp` — MCP panel
+## Install / update
 
-## Upstream
+```bash
+curl -fsSL https://raw.githubusercontent.com/FRIKKern/pi-flow/main/scripts/quickstart.sh | bash
+curl -fsSL https://raw.githubusercontent.com/FRIKKern/pi-flow/main/scripts/update.sh | bash
+```
 
-https://github.com/FRIKKern/paperflow/blob/main/ARCHITECTURE.md
+In Pi: `/pi-flow-setup` · `/pi-flow-status` · `/pi-flow-handoff` · `/pi-flow-update`
+
+## Docs
+
+`docs/CMUX.md` · `docs/BEST-PRACTICES.md` · `docs/EDITING.md` · `docs/BEADS.md` · `docs/HOST.md`

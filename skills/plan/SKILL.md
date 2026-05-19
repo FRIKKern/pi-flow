@@ -1,47 +1,39 @@
 ---
 name: plan
 description: >-
-  pi-flow · paperflow plan. Use for "plan X", "draft a plan", "grill this plan",
-  "revise the plan after grill", "simplify this doc". Draft → grill (mandatory pause) → revise;
-  materialise Beads work-tasks. HTML under ~/docs/paperflow/plans/.
+  pi-flow · paperflow plan. Draft → grill (mandatory pause) → revise; Beads work-tasks.
+  HTML under ~/docs/paperflow/plans/.
+pipeline: [goal, plan, build, review]
 ---
 
-# plan (pi-flow)
+# plan
 
-Port av [paperflow plan](https://github.com/FRIKKern/paperflow/blob/main/skills/plan/SKILL.md).
+Orchestrator follows `lib/orchestrator.md` + `lib/paperflow-thresholds.md`.
 
-**Pi tools first:** `paperflow_active_goal` · `paperflow_host ensure` · `paperflow_verify` — see `lib/paperflow-tools.md`.
+**Tools:** `paperflow_active_goal` · `paperflow_host ensure` · `paperflow_verify`
 
-## Process
+## Flow
 
-**Questionnaire** (optional, unclear scope) → **Draft** → **Grill** (pause) → **Revise**
+Questionnaire (optional) → **Draft** → **Grill** (stop) → **Revise**
 
-Questionnaire og grill på samme plan — ikke begge.
+### Draft
 
-### Phase A — Draft
+1. `paperflow_active_goal` or read `.paperflow/active-*`
+2. **`pi-flow.doc-writer`** → plan HTML (`lib/paperflow-paths.md`)
+3. **`pi-flow.bd-keeper`** → `bd create` + deps + `file-claim:` labels
+4. **`researcher`** (subagent) if external docs needed before draft
+5. **`paperflow_verify`** on plan URL — FAIL blocks grill
 
-1. Read `.paperflow/active-goal` + active phase (`bd show`)
-2. **doc-writer** → `~/docs/paperflow/plans/<YYYY-MM-DD>-<slug>.html`
-   - Eyebrow → H1 → byline → ingress → H2 + Mermaid
-   - `window.PAPERFLOW_GOAL_ID` required
-3. Orchestrator: `bd create` + `bd dep add` per step; `file-claim:` labels when paths known
-4. **researcher** (+ MCP) før draft hvis ekstern docs trengs
-5. **CMUX:** kall **`paperflow_verify`** med plan-URL (eller `pi-flow.cmux-verifier`). PASS/SKIP → continue; FAIL → debug før grill
+### Grill (mandatory)
 
-### Phase B — Grill (mandatory)
+1. **`researcher`** + **`pi-flow.doc-writer`** → grill HTML
+2. **STOP** for answers (browser Submit or chat)
+3. Skip only if user said `--skip-grill`
 
-1. **researcher** → questions; **doc-writer** → `~/docs/paperflow/grills/<date>-<slug>-grill.html`
-2. **STOP** until answers:
-   - With paperflow host: Submit in browser → `Grill answers for <plan>:`
-   - Pi-only: user answers in chat, structured
-3. Skip only on explicit "skip grill"
+### Revise
 
-### Phase C — Revise
+1. **`pi-flow.doc-writer`** updates plan
+2. **`pi-flow.bd-keeper`** syncs tasks
+3. Hand off: `/skill:build`
 
-1. **doc-writer** updates plan HTML
-2. **bd-keeper** syncs work-tasks
-3. Offer: re-grill | `/skill:build` | stop
-
-## Handoff
-
-Etter revise: `/skill:build` — ikke implementer i plan-skill.
+Do not implement code in this skill.

@@ -1,36 +1,31 @@
 ---
 name: build
 description: >-
-  pi-flow · paperflow build. Use for "build", "next step", "ship it", "execute the plan".
-  Claims next bd ready task, dispatches worker subagent, verifies, closes; loops until phase empty.
+  pi-flow · paperflow build. Claim next ready bd task, dispatch worker, verify, close; loop until phase empty.
+pipeline: [goal, plan, build, review]
 ---
 
-# build (pi-flow)
+# build
 
-Port av [paperflow build](https://github.com/FRIKKern/paperflow/blob/main/skills/build/SKILL.md).
+Orchestrator: `lib/orchestrator.md` + `lib/paperflow-thresholds.md`.
 
-**Pi tools:** `paperflow_beads` `ready` · `paperflow_active_goal` — mutations via `pi-flow.bd-keeper`.
+**Tools:** `paperflow_beads` ready · `sync_todo` · `paperflow_active_goal`
+
+Read this skill file when executing (`lib/lazy-skills.md`).
 
 ## Loop
 
 ```text
 paperflow_beads({ action: "ready" })
-# → pi-flow.bd-keeper: bd update --claim
-# → pi-flow.worker (one task)
-# → pi-flow.bd-keeper: bd update --close
+→ pi-flow.bd-keeper: claim
+→ worker (pi-subagent): one task, self-contained brief
+→ reviewer if evidence >500 tokens
+→ pi-flow.bd-keeper: close
+→ paperflow_beads({ action: "sync_todo" }) after each close (session snapshot)
 ```
 
 ## Rules
 
-- Include `lib/paperflow-thresholds.md` in orchestrator behavior
-- Commits >30 LOC: trailer `Subagent-Run: <task-id>`
-- One work-task per worker dispatch
-- Phase empty → advance `.paperflow/active-phase` or `/skill:review`
-
-## Agents
-
-| Role | Agent |
-|------|--------|
-| Implement | `pi-flow.worker` |
-| Large evidence | `pi-flow.reviewer` |
-| bd | `pi-flow.bd-keeper` or orchestrator (exempt) |
+- One work-task per **worker** dispatch
+- Commits >30 LOC: `Subagent-Run: <task-id>`
+- Phase empty → `/skill:review`

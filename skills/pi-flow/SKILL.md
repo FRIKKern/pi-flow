@@ -1,55 +1,38 @@
 ---
 name: pi-flow
 description: >-
-  Overview of pi-flow — paperflow lifecycle in Pi (CMUX). Points to goal/plan/build/review skills
-  and pi-flow agents. Use when unsure which skill to invoke.
+  Router only — which pi-flow skill or command to use. Use when the user is unsure where to start.
 ---
 
-# pi-flow
+# pi-flow (router)
 
-**pi-flow** brings [paperflow](https://github.com/FRIKKern/paperflow) to [Pi](https://pi.dev/) — primarily in **cmux**.
+Read `lib/orchestrator.md` for dispatch rules. **Lazy load:** read each skill's `SKILL.md` (or `skill://name`) when executing — do not rely on this table alone (`lib/lazy-skills.md`).
 
-## Lifecycle (same mental model as paperflow)
+## Start here
+
+| User intent | Invoke |
+|-------------|--------|
+| Full flow from vision | `/skill:autopilot "…"` |
+| New goal | `/skill:goal "…"` |
+| Plan only | `/skill:plan` |
+| Execute tasks | `/skill:build` |
+| Review / ship | `/skill:review` |
+| Switch goal | `/skill:resume` |
+| First time / broken install | `/pi-flow-setup` then `/pi-flow-status` |
+| Long session / context full | `/pi-flow-handoff [focus]` |
+| Update pi-flow | `/pi-flow-update` |
+
+## Lifecycle
 
 ```text
-/skill:goal → /skill:plan → grill pause → revise → /skill:build → /skill:review
+/skill:goal → /skill:plan → grill → revise → /skill:build → /skill:review
 ```
 
-Or: `/skill:autopilot "<vision>"`
+## Agents (only three are pi-flow-specific)
 
-## CMUX (read `docs/CMUX.md`)
+- `pi-flow.doc-writer` · `pi-flow.bd-keeper` · `pi-flow.cmux-verifier`
+- Everything else: **pi-subagents** builtins (`worker`, `reviewer`, `scout`, …)
 
-When cmux is detected, pi-flow loads `/skill:cmux` and `/skill:cmux-browser` automatically.
+## Tools
 
-| Tool | Purpose |
-|------|---------|
-| `paperflow_host` | Check/start external daemon (not embedded) |
-| `paperflow_verify` | Doc render check (PASS/WARN/FAIL/SKIP) |
-| `paperflow_cmux` | Detect workspace or open URL in browser |
-| `paperflow_active_goal` | Read `.paperflow/active-*` pointers |
-| `paperflow_beads` | `bd ready` / `show` / `init` (read-only-ish) |
-
-Full list: `lib/paperflow-tools.md` · `docs/BEST-PRACTICES.md`
-
-Commands: `/pi-flow-setup` · `/pi-flow-doctor` · `/pi-flow-cmux-layout`
-
-## Paperflow standards we follow
-
-- HTML plans/grills under `~/docs/paperflow/` (when host installed)
-- Beads (`bd`) as persistent task graph; `.paperflow/active-*` pointers
-- `lib/paperflow-thresholds.md` — orchestrator delegates >30 LOC / >50 prose / >500 token evidence
-- Subagents: `pi-flow.doc-writer`, `pi-flow.bd-keeper`, `pi-flow.worker`, …
-
-## Model
-
-**pi-flow is model-agnostic.** Team default after `/pi-flow-setup` is `composer-2.5` via Cursor provider (`/login cursor`). Change anytime with `/model` or another provider in `models.json`.
-
-## MCP
-
-`scout` / `researcher` use `mcp:` in agent frontmatter — required for analysis/grill prep.
-
-## Commands
-
-- `/pi-flow-setup` — install defaults + sync agents
-- `/pi-flow-doctor` — pi-flow + cmux + paperflow checklist
-- `/pi-flow-cmux-layout` — print cmux workspace command
+`lib/paperflow-tools.md`
