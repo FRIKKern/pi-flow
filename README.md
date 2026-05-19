@@ -76,10 +76,18 @@ Plans and grills open automatically. Click **Submit** on a grill to send answers
 
 ```text
 /skill:browserbase
-mcp({ server: "browserbase" })
-# researcher subagent for real site research:
-# dispatch researcher: "Summarize https://docs.browserbase.com/features"
+# Delegate (boss does not call MCP inline):
+# researcher: "Summarize https://docs.browserbase.com/integrations/mcp/introduction"
 ```
+
+Shell smoke (optional):
+
+```bash
+export PATH="$HOME/.pi/agent/node_modules/.bin:$HOME/.pi/agent/bin:$PATH"
+browse doctor && browse open "https://example.com" --remote && browse stop
+```
+
+Skip Browserbase on CI/verify-only installs: `PI_FLOW_SKIP_BROWSERBASE=1` (see [INSTALL-SCRIPTS](./docs/INSTALL-SCRIPTS.md)). Research brief: [paperflow spec](http://localhost:8767/paperflow/specs/2026-05-19-pi-flow-browserbase-research.html).
 
 ---
 

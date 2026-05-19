@@ -28,11 +28,15 @@ try {
 	const sub = applyPiFlowSubagentConfig();
 	ok(`subagent config → ${sub.path}`);
 
-	try {
-		applyBrowserbaseMcp({ packageRoot, mode: "hosted" });
-		ok("Browserbase MCP config");
-	} catch {
-		warn("Browserbase MCP skip");
+	if (process.env.PI_FLOW_SKIP_BROWSERBASE === "1") {
+		warn("Browserbase skipped (PI_FLOW_SKIP_BROWSERBASE=1)");
+	} else {
+		try {
+			applyBrowserbaseMcp({ packageRoot, mode: "hosted" });
+			ok("Browserbase MCP config");
+		} catch {
+			warn("Browserbase MCP skip");
+		}
 	}
 
 	if (fs.existsSync(path.join(repoRoot, ".git")) || fs.existsSync(path.join(repoRoot, "package.json"))) {

@@ -143,7 +143,11 @@ main() {
   need_node
   install_bd || true
   install_jq || true
-  install_browse || true
+  if [ "${PI_FLOW_SKIP_BROWSERBASE:-0}" = "1" ]; then
+    info "Skipping browse install (PI_FLOW_SKIP_BROWSERBASE=1)"
+  else
+    install_browse || true
+  fi
   install_cmux_shell || true
 
   if command -v git >/dev/null 2>&1; then ok "git: ok"; else warn "git not found"; fi

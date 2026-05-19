@@ -52,6 +52,7 @@ Checks that the script bundle resolves (local or downloaded).
 | Variable | Default | Purpose |
 |----------|---------|--------|
 | `PI_FLOW_INSTALL_OPENCODE` | `1` | Install `opencode-ai` global CLI during quickstart |
+| `PI_FLOW_SKIP_BROWSERBASE` | `0` | Set `1` to skip `browse` install and MCP merge in bootstrap |
 | `PI_FLOW_OPENCODE_SERVE` | unset | Set `1` to auto-start `opencode serve` on setup |
 | `PI_FLOW_YES` | `0` | Unattended install (`1` = yes) |
 
