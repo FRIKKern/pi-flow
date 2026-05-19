@@ -2,6 +2,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { isPiSubagentChildSession } from "../shared/extension-context.ts";
 import { bdReady } from "../shared/beads-client.ts";
 import { formatDoctorReport, runPiFlowDoctor } from "../shared/doctor.ts";
 import { ensurePiFlowDeps, formatDepsReport } from "../shared/deps.ts";
@@ -67,6 +68,8 @@ function installAgents(ctx: ExtensionContext, cwd = process.cwd()): void {
 }
 
 export default function piFlowSetup(pi: ExtensionAPI): void {
+	if (isPiSubagentChildSession()) return;
+
 	pi.on("session_start", async (_event, ctx) => {
 		loadBrowserbaseEnvFile();
 		// Lightweight: ensure MCP + env file exist; defer browse install to /pi-flow-setup

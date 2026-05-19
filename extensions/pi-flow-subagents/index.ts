@@ -39,6 +39,7 @@ import {
 	getAgentstormConfig,
 	parseAgentstormArgs,
 } from "../shared/agentstorm.ts";
+import { isPiSubagentChildSession } from "../shared/extension-context.ts";
 import {
 	loadStormRecoveryConfig,
 	StormRecoveryController,
@@ -83,6 +84,10 @@ function fsExists(filePath: string): boolean {
 }
 
 export default function piFlowSubagents(pi: ExtensionAPI): void {
+	// Boss-only: roster, /pf-follow, storm recovery. Children load this via package.json
+	// and crash or hang on reconcileRoster / UI hooks — never run in PI_SUBAGENT_CHILD.
+	if (isPiSubagentChildSession()) return;
+
 	const stormRecovery = new StormRecoveryController(loadStormRecoveryConfig());
 	let roster: SubagentRosterState = createRosterState(null);
 	let bossCtx: ExtensionContext | null = null;

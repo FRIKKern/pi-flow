@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import type { ExtensionAPI, ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
+import { isPiSubagentChildSession } from "../shared/extension-context.ts";
 import { loadMergedPiSettings } from "../shared/settings-loader.ts";
 import { appendSessionJournal } from "../shared/session-memory.ts";
 import {
@@ -25,6 +26,8 @@ import {
 const STATUS_KEY = "pi-flow-sess";
 
 export default function piFlowSessions(pi: ExtensionAPI): void {
+	if (isPiSubagentChildSession()) return;
+
 	const settings = loadMergedPiSettings();
 	const namingConfig = loadSessionNamingConfig(settings);
 	const continueConfig = loadSessionContinueConfig(settings);
