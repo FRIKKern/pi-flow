@@ -26,9 +26,12 @@ summary (no archive unless user asks)
 
 After plan draft: **stop** until grill answers — unless user passed `--skip-grill`.
 
-## CMUX + paperflow host
+## CMUX + paperflow host (required)
 
-Recommended: paperflow `install.sh` + Pi (`pi-flow`) in cmux pane + browser on :8767.
+1. cmux + paperflow `install.sh`
+2. `scripts/cmux-layout.sh <repo> <slug>` — Pi workspace
+3. `/skill:cmux` if layout/verify/bridge fails
+4. Pi registers session on start → grill Submit → this pane
 
 ## Transparency
 

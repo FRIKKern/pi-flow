@@ -1,6 +1,6 @@
 {
   "name": "pi-flow",
-  "version": "0.3.0",
+  "version": "0.5.0",
   "description": "Paperflow lifecycle in Pi (CMUX): goal → plan → grill → build → review. HTML artifacts, Beads, MCP subagents. Model-agnostic; Composer 2.5 default.",
   "type": "module",
   "license": "MIT",
@@ -22,10 +22,12 @@
   "files": [
     "agents/",
     "bin/",
+    "scripts/",
     "extensions/",
     "prompts/",
     "settings/",
     "skills/",
+    "skills-cmux/",
     "docs/",
     "lib/",
     "AGENTS.md",
@@ -42,7 +44,8 @@
   "pi": {
     "image": "https://raw.githubusercontent.com/FRIKKern/pi-flow/main/assets/logo.svg",
     "extensions": [
-      "./extensions/pi-flow-core/index.ts",
+      "./extensions/pi-flow-setup/index.ts",
+      "./extensions/pi-flow-host/index.ts",
       "node_modules/pi-cursor-provider/index.ts",
       "node_modules/pi-mcp-adapter/index.ts",
       "node_modules/pi-subagents/src/extension/index.ts"
@@ -59,7 +62,8 @@
   "dependencies": {
     "pi-cursor-provider": "^0.1.11",
     "pi-mcp-adapter": "^2.6.1",
-    "pi-subagents": "^0.24.3"
+    "pi-subagents": "^0.24.3",
+    "typebox": "^1.0.0"
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": ">=0.52.10"

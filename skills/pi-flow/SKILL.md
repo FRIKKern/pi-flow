@@ -17,6 +17,18 @@ description: >-
 
 Or: `/skill:autopilot "<vision>"`
 
+## CMUX (read `docs/CMUX.md`)
+
+When cmux is detected, pi-flow loads `/skill:cmux` and `/skill:cmux-browser` automatically.
+
+| Tool | Purpose |
+|------|---------|
+| `paperflow_verify` | Doc render check (PASS/WARN/FAIL/SKIP) |
+| `paperflow_cmux` | Detect workspace or open URL in browser |
+| `paperflow_active_goal` | Read `.paperflow/active-*` pointers |
+
+Commands: `/pi-flow-setup` · `/pi-flow-doctor` · `/pi-flow-cmux-layout`
+
 ## Paperflow standards we follow
 
 - HTML plans/grills under `~/docs/paperflow/` (when host installed)
@@ -35,4 +47,5 @@ Or: `/skill:autopilot "<vision>"`
 ## Commands
 
 - `/pi-flow-setup` — install defaults + sync agents
-- `/pi-flow-doctor` — pi-flow + paperflow host checklist
+- `/pi-flow-doctor` — pi-flow + cmux + paperflow checklist
+- `/pi-flow-cmux-layout` — print cmux workspace command

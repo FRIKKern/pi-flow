@@ -1,52 +1,60 @@
-# pi-flow — paperflow in Pi (CMUX)
+# pi-flow — paperflow in CMUX
 
-You run in **[Pi](https://pi.dev/)** with **pi-flow** — a port of [FRIKKern/paperflow](https://github.com/FRIKKern/paperflow) orchestration. **Cursor is only a model provider** (default `composer-2.5` after setup); the product is the paperflow lifecycle.
+Pi-distribusjon for **[cmux](https://github.com/manaflow-ai/cmux)** + **[paperflow](https://github.com/FRIKKern/paperflow)**. **Cursor/Composer 2.5** er valgfri standardmodell — ikke produktnavnet.
 
-## Lifecycle
+## CMUX is the runtime (read first)
 
 ```text
-goal → plan (HTML) → grill (pause) → revise → build → review
+Terminal surface [Pi]  +  Browser surface [:8767/paperflow/]  +  Dock feeds
 ```
 
-- **HTML** is the planning artifact (`~/docs/paperflow/...` when paperflow host is installed).
-- **Beads (`bd`)** is the task graph; pointers in `.paperflow/active-{goal,phase}`.
-- Read **`lib/paperflow-thresholds.md`** on every orchestration turn.
+| Doc | Content |
+|-----|---------|
+| **`docs/CMUX.md`** | Full CMUX expert reference |
+| `lib/cmux-reference.md` | Cheat sheet |
+| `/skill:cmux` | Orchestrator CMUX playbook |
+| `/skill:cmux-browser` | Doc verify + browser automation |
+
+**Session start:** `pi-flow-host` registers with paperflow-daemon so grill **Submit** → `cmux send` → Pi pane.
+
+**Tools:** `paperflow_verify` · `paperflow_cmux` · `paperflow_active_goal`
+
+**Outside cmux:** degraded mode (chat grill, SKIP verify) — still works, not target experience.
+
+## Lifecycle (paperflow)
+
+```text
+/skill:goal → /skill:plan → grill pause → revise → /skill:build → /skill:review
+```
+
+- HTML artifacts: `~/docs/paperflow/…`
+- Beads + `.paperflow/active-{goal,phase}`
+- `lib/paperflow-thresholds.md`
 
 ## Skills
 
-| Skill | Use |
-|-------|-----|
-| `/skill:goal` | Open Goal, epic + 3 phases |
-| `/skill:plan` | Draft → grill → revise |
-| `/skill:build` | claim → worker → verify → close |
-| `/skill:review` | Approve / reject |
-| `/skill:autopilot` | Full chain (stops at grill) |
-| `/skill:resume` | Switch Goal |
+| Skill | Role |
+|-------|------|
+| `goal` `plan` `build` `review` `autopilot` `resume` | paperflow lifecycle |
+| `cmux` `cmux-browser` | CMUX layout, verify, bridge (auto-loaded in cmux) |
+| `pi-flow` | Overview |
 
-## Agents (package `pi-flow`)
+## Agents (`pi-flow.*`)
 
 | Agent | Role |
 |-------|------|
-| `pi-flow.doc-writer` | HTML only — plans, grills, goals |
-| `pi-flow.bd-keeper` | `bd` + pointers only |
-| `pi-flow.scout` | Code + MCP |
-| `pi-flow.researcher` | External docs + MCP |
-| `pi-flow.worker` | Implementation |
-| `pi-flow.reviewer` | Review / verify |
-| `pi-flow.planner` | Light outline only — full plans → doc-writer |
-| `pi-flow.oracle` | Second opinion |
-
-## CMUX
-
-- Install [paperflow host](https://github.com/FRIKKern/paperflow) for :8767, grill Submit, dock.
-- Pi pane runs pi-flow; browser pane shows plan/grill HTML.
-- Without host: grill answers in chat; artifacts under `docs/paperflow/`.
+| `doc-writer` | HTML plans/grills |
+| `bd-keeper` | Beads only |
+| `cmux-verifier` | `paperflow-doc-verify` one-liner |
+| `cmux-advisor` | CMUX debug (read-only) |
+| `scout` `researcher` | MCP research |
+| `worker` `reviewer` `oracle` | build / review |
 
 ## Commands
 
-- `/pi-flow-setup`, `/pi-flow-doctor`
-- `/mcp` — MCP servers
+- `/pi-flow-setup` `/pi-flow-doctor` `/pi-flow-cmux-layout`
+- `/mcp` — MCP panel
 
-## Upstream spec
+## Upstream
 
 https://github.com/FRIKKern/paperflow/blob/main/ARCHITECTURE.md

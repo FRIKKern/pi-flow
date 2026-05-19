@@ -1,71 +1,154 @@
-# pi-flow
+<p align="center">
+  <strong>pi-flow</strong><br/>
+  Paperflow lifecycle in <a href="https://pi.dev/">Pi</a>, built for <a href="https://github.com/manaflow-ai/cmux">cmux</a>
+</p>
 
-**Repo:** https://github.com/FRIKKern/pi-flow
+<p align="center">
+  <a href="https://github.com/FRIKKern/pi-flow">GitHub</a> ·
+  <a href="./docs/CMUX.md">CMUX guide</a> ·
+  <a href="./docs/PAPERFLOW.md">Paperflow mapping</a> ·
+  <a href="./docs/EXTENSIONS.md">Extensions</a>
+</p>
 
-**Paperflow in Pi** — for [cmux](https://github.com/manaflow-ai/cmux). Same lifecycle as [FRIKKern/paperflow](https://github.com/FRIKKern/paperflow): Goal → HTML plan → **grill** → build (Beads) → review. Cursor/Composer 2.5 is just our **default model**, not the product name.
+---
 
-## Why pi-flow exists
+**pi-flow** is a [Pi package](https://github.com/earendil-works/pi) that brings [FRIKKern/paperflow](https://github.com/FRIKKern/paperflow) to your terminal: **Goal → HTML plan → grill → build (Beads) → review** — with cmux browser panes, Dock feeds, and grill **Submit** routed back to Pi.
 
-[paperflow](https://github.com/FRIKKern/paperflow) is built for Claude Code + cmux (daemon, grill bridge, HTML @ :8767). **pi-flow** is the same orchestration discipline for **Pi**: subagents, MCP in research phases, and skills named like paperflow (`goal`, `plan`, `build`, …).
+Composer 2.5 via Cursor is our **default model**, not the product name. Use any provider Pi supports.
 
-## CMUX stack
+## Install in 60 seconds
 
-```text
-paperflow host   →  HTML, grill Submit, dock (optional)
-pi-flow in Pi    →  /skill:goal | plan | build | review | autopilot
-cmux             →  terminal + browser panes
-```
+**One command** (macOS — installs Pi, paperflow host, and pi-flow):
 
 ```bash
-# Paperflow host (HTML + bridge) — strongly recommended in cmux
+curl -fsSL https://raw.githubusercontent.com/FRIKKern/pi-flow/main/scripts/quickstart.sh | bash
+```
+
+**Or step by step:**
+
+```bash
+# 1. Pi
+npm install -g @earendil-works/pi-coding-agent
+
+# 2. pi-flow package
+pi install git:github.com/FRIKKern/pi-flow
+
+# 3. paperflow host (daemon :8767, auto-open, grill bridge)
 curl -fsSL https://raw.githubusercontent.com/FRIKKern/paperflow/main/scripts/quickstart.sh | bash
 
-# Pi + pi-flow
-npm install -g @earendil-works/pi-coding-agent
-pi install git:github.com/FRIKKern/pi-flow
-pi
-/pi-flow-setup
+# 4. cmux (optional but recommended)
+brew tap manaflow-ai/cmux && brew install --cask cmux
 ```
 
-**Model (optional default):** `/login cursor` then `/model` → `composer-2.5`. Use any provider Pi supports — pi-flow does not require Cursor.
+## First session
 
-## Skills (mirror paperflow)
+### A — With cmux (recommended)
 
-| Pi | paperflow |
-|----|-------------|
-| `/skill:goal` | `/paperflow:goal` |
-| `/skill:plan` | `/paperflow:plan` |
-| `/skill:build` | `/paperflow:build` |
-| `/skill:review` | `/paperflow:review` |
-| `/skill:autopilot` | `/paperflow:autopilot` |
-| `/skill:resume` | `/paperflow:resume` |
+```bash
+# In a normal shell (not Pi yet):
+git clone https://github.com/your-org/your-repo.git && cd your-repo
+curl -fsSL https://raw.githubusercontent.com/FRIKKern/pi-flow/main/scripts/cmux-layout.sh | bash -s -- "$(pwd)" my-first-goal
+```
+
+Open Pi in the **left terminal pane**, then:
 
 ```text
-/skill:autopilot "rewrite onboarding"
+/pi-flow-setup
+/login cursor          # optional — enables composer-2.5 default
+/skill:autopilot "Describe your goal in one sentence"
 ```
 
-## Agents (`pi-flow.*`)
+Split the **right pane** to `http://localhost:8767/` — plans and grills open there automatically.
 
-| Agent | paperflow equivalent |
-|-------|----------------------|
-| `doc-writer` | `paperflow-doc-writer` |
-| `bd-keeper` | `paperflow-bd-keeper` |
-| `scout`, `researcher` | research / MCP |
-| `worker`, `reviewer` | build / review |
+### B — Pi only (no cmux)
 
-Bundled: `pi-subagents`, `pi-mcp-adapter`. Optional dep: `pi-cursor-provider` (Cursor subscription models only).
+```bash
+cd your-repo && pi
+```
+
+```text
+/pi-flow-setup
+/skill:goal
+```
+
+Grill answers happen in chat; doc verify may `SKIP` without the host. Works, but cmux is the target experience.
+
+## What you get
+
+| Layer | What |
+|-------|------|
+| **Skills** | `goal` · `plan` · `build` · `review` · `autopilot` · `resume` |
+| **CMUX skills** | `cmux` · `cmux-browser` (loaded when cmux is detected) |
+| **Pi tools** | `paperflow_verify` · `paperflow_cmux` · `paperflow_active_goal` |
+| **Subagents** | `pi-flow.doc-writer` · `bd-keeper` · `worker` · `scout` · … |
+| **Bundled** | `pi-subagents` · `pi-mcp-adapter` · optional `pi-cursor-provider` |
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│  cmux workspace                                              │
+│  ┌──────────────────┐  ┌──────────────────────────────────┐ │
+│  │ Terminal (Pi)    │  │ Browser (:8767/paperflow/…)       │ │
+│  │ /skill:plan      │  │ Plans · grills · auto-open        │ │
+│  │ grill ← Submit   │◄─┤ paperflow daemon + grill bridge   │ │
+│  └──────────────────┘  └──────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Commands
+
+| Command | Purpose |
+|---------|---------|
+| `/pi-flow-setup` | Settings, agents (`.pi/agents/pi-flow/`), next steps |
+| `/pi-flow-doctor` | Checklist — cmux, host, agents |
+| `/pi-flow-cmux-layout` | Print `cmux-layout.sh` for this repo |
+
+## Skills ↔ paperflow
+
+| Pi (`/skill:…`) | Claude Code paperflow |
+|-----------------|------------------------|
+| `goal` | `/paperflow:goal` |
+| `plan` | `/paperflow:plan` |
+| `build` | `/paperflow:build` |
+| `review` | `/paperflow:review` |
+| `autopilot` | `/paperflow:autopilot` |
+| `cmux` | — (pi-flow) |
+
+## Architecture (short)
+
+- **Skills** = playbooks (markdown) — lifecycle stays here
+- **Extensions** = wires — session register, verify tools, goal context
+- **paperflow host** = browser + daemon — do not duplicate in pi-flow
+
+See **[docs/EXTENSIONS.md](./docs/EXTENSIONS.md)** for the split between `pi-flow-setup` and `pi-flow-host`.
 
 ## Docs
 
-- [docs/PAPERFLOW.md](./docs/PAPERFLOW.md) — mapping to upstream
-- [docs/CMUX.md](./docs/CMUX.md) — cmux layout
-- [lib/paperflow-thresholds.md](./lib/paperflow-thresholds.md)
+| Doc | Content |
+|-----|---------|
+| [docs/CMUX.md](./docs/CMUX.md) | CMUX expert reference |
+| [docs/PAPERFLOW.md](./docs/PAPERFLOW.md) | Upstream mapping |
+| [docs/EXTENSIONS.md](./docs/EXTENSIONS.md) | Extension design |
+| [lib/cmux-reference.md](./lib/cmux-reference.md) | Cheat sheet |
 
-## Develop
+## Troubleshooting
+
+| Symptom | Fix |
+|---------|-----|
+| `not in cmux` warning | Run Pi inside cmux terminal surface; check `CMUX_WORKSPACE_ID` |
+| Grill Submit does nothing | `curl -sf localhost:8767/health`; restart paperflow host |
+| `paperflow_verify` → SKIP | Install paperflow host (`quickstart.sh`) |
+| Subagents missing | Run `/pi-flow-setup` — installs `.pi/agents/pi-flow/` |
+| Wrong model | `/model` or edit `~/.pi/agent/settings.json` |
+
+## Development
 
 ```bash
 git clone https://github.com/FRIKKern/pi-flow.git
-cd pi-flow && npm install && pi -e .
+cd pi-flow && npm install
+pi -e .          # load package from cwd
+/pi-flow-setup
 ```
 
-MIT — see [LICENSE](./LICENSE).
+## License
+
+MIT · [FRIKKern/pi-flow](https://github.com/FRIKKern/pi-flow)

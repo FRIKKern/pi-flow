@@ -24,6 +24,7 @@ Questionnaire og grill på samme plan — ikke begge.
    - `window.PAPERFLOW_GOAL_ID` required
 3. Orchestrator: `bd create` + `bd dep add` per step; `file-claim:` labels when paths known
 4. **researcher** (+ MCP) før draft hvis ekstern docs trengs
+5. **CMUX:** kall **`paperflow_verify`** med plan-URL (eller `pi-flow.cmux-verifier`). PASS/SKIP → continue; FAIL → debug før grill
 
 ### Phase B — Grill (mandatory)
 

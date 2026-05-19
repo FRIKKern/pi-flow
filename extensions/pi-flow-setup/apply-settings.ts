@@ -5,7 +5,6 @@ import * as path from "node:path";
 /**
  * Defaults merged by /pi-flow-setup.
  * Model/provider are team defaults — change via /model and /login anytime.
- * pi-cursor-provider is an optional npm dep for Cursor-subscription models only.
  */
 export const PI_FLOW_DEFAULTS = {
 	defaultProvider: "cursor",

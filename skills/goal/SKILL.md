@@ -22,7 +22,7 @@ Abort ved critical (exit 2). Pi-only uten host: hopp over, bruk `docs/paperflow/
 ## Åpne Goal
 
 1. **bd-keeper** (eller orchestrator inline): epic + `phase-pre-flight` / `phase-build` / `phase-review`
-2. Pointers: `.paperflow/active-goal`, `.paperflow/active-phase`
+2. Pointers: `.paperflow/active-goal`, `.paperflow/active-phase` — eller kall **`paperflow_active_goal`**
 3. **doc-writer**: `~/docs/paperflow/goals/<slug>/index.html` — se `lib/paperflow-paths.md`
 4. **CMUX**: `cmux browser open` på :8767 URL når daemon kjører
 

@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# Register this Pi session with paperflow-daemon so grill Submit and doc buttons
+# can cmux send back to the Pi surface. Mirrors paperflow-session-register for Pi.
+set -euo pipefail
+
+LOG_DIR="${HOME}/.paperflow/logs"
+INST_DIR="${HOME}/.paperflow/instances"
+LOG_FILE="${LOG_DIR}/pi-flow-session-register.log"
+DAEMON_URL="${PAPERFLOW_DAEMON_URL:-http://localhost:8767}"
+
+mkdir -p "$LOG_DIR" "$INST_DIR" 2>/dev/null || true
+
+log_warn() {
+  local ts
+  ts="$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date)"
+  printf '[%s] %s\n' "$ts" "$1" >>"$LOG_FILE" 2>/dev/null || true
+}
+
+trap 'exit 0' ERR
+trap 'exit 0' EXIT
+
+SID="${PI_FLOW_SESSION_ID:-${PI_SESSION_ID:-}}"
+if [ -z "$SID" ]; then
+  SID="$(uuidgen 2>/dev/null || true)"
+  log_warn "generated session id $SID (set PI_FLOW_SESSION_ID for stable routing)"
+fi
+[ -z "$SID" ] && exit 0
+
+CMUX_WS="${CMUX_WORKSPACE_ID:-${CMUX_WORKSPACE:-}}"
+CMUX_SF="${CMUX_SURFACE_REF:-${CMUX_SURFACE_ID:-${CMUX_SURFACE:-}}}"
+
+if [ -z "$CMUX_SF" ] && command -v cmux >/dev/null 2>&1; then
+  CMUX_SF="$(cmux identify 2>/dev/null \
+    | jq -r '.caller.surface_ref // empty' 2>/dev/null || true)"
+fi
+
+TTY_VAL="$(tty 2>/dev/null || true)"
+case "$TTY_VAL" in /dev/*) ;; *) TTY_VAL="" ;; esac
+
+PID_VAL="$$"
+if command -v jq >/dev/null 2>&1; then
+  BODY="$(jq -nc \
+    --arg sid "$SID" \
+    --arg ws "$CMUX_WS" \
+    --arg sf "$CMUX_SF" \
+    --arg tt "$TTY_VAL" \
+    --argjson pid "$PID_VAL" \
+    '{session_id: $sid,
+      agent: "pi-flow",
+      cmux_workspace: (if $ws == "" then null else $ws end),
+      cmux_surface: (if $sf == "" then null else $sf end),
+      tty: (if $tt == "" then null else $tt end),
+      pid: $pid}')"
+else
+  log_warn "jq missing — cannot register session"
+  exit 0
+fi
+
+HTTP_OUT="$(curl --max-time 2 -sS -o /dev/null -w '%{http_code}' \
+  -X POST -H 'Content-Type: application/json' \
+  --data "$BODY" \
+  "$DAEMON_URL/sessions/register" 2>>"$LOG_FILE" || true)"
+[ -z "$HTTP_OUT" ] && HTTP_OUT="000"
+
+case "$HTTP_OUT" in
+  200|201|204)
+    printf '%s\n' "$SID" >"$INST_DIR/pi-flow-${SID}.session" 2>/dev/null || true
+    ;;
+  000)
+    log_warn "daemon unreachable at $DAEMON_URL"
+    ;;
+  *)
+    log_warn "daemon HTTP $HTTP_OUT for session=$SID"
+    ;;
+esac
+
+exit 0
