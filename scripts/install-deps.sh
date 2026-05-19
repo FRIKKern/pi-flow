@@ -87,8 +87,10 @@ init_beads_repo() {
 }
 
 install_cmux_shell() {
-  local script
-  script="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/install-cmux-shell.sh"
+  local script=""
+  if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
+    script="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/install-cmux-shell.sh"
+  fi
   if [[ -f "$script" ]]; then
     info "Installing cmux boss layout (pf / pif)…"
     bash "$script" || warn "cmux shell install had issues"
