@@ -1,5 +1,7 @@
 # pi-cursor
 
+**Repo:** https://github.com/FRIKKern/pi-cursor (public)
+
 **Din egen Pi-distribusjon:** terminal-harnesset [Pi](https://pi.dev/), modellen **Composer 2.5** (via Cursor-abonnement), og **MCP på subagenter** i analyse- og gravingsfaser.
 
 Ikke en fork av hele [pi-mono](https://github.com/earendil-works/pi) — det er ikke slik økosystemet deler «egen Pi». Vi følger samme mønster som [@astrofoundry/pi-astro](https://www.npmjs.com/package/@astrofoundry/pi-astro), [@juicesharp/rpiv-pi](https://www.npmjs.com/package/@juicesharp/rpiv-pi) og [gentle-pi](https://www.npmjs.com/package/gentle-pi): **ett `pi install` som bundler extensions, agents, skills og defaults.**
@@ -24,9 +26,10 @@ Ikke en fork av hele [pi-mono](https://github.com/earendil-works/pi) — det er 
 ## Installasjon
 
 ```bash
-pi install npm:pi-cursor
-# eller fra denne repo:
+pi install git:github.com/FRIKKern/pi-cursor
+# eller lokalt:
 pi install /path/to/pi-cursor
+# npm (når publisert): pi install npm:pi-cursor
 ```
 
 Start Pi i et prosjekt:
