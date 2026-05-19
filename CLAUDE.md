@@ -1,51 +1,6 @@
-# pi-flow — paperflow in CMUX
+# Project Instructions for AI Agents
 
-**Simple stack:** 6 lifecycle skills · **3 pi-flow agents** · pi-subagents builtins · external paperflow host.
-
-## Lifecycle
-
-```text
-/skill:goal → /skill:plan → grill → revise → /skill:build → /skill:review
-```
-
-Or `/skill:autopilot "vision"`. Router: `/skill:pi-flow` · policy: `lib/orchestrator.md`.
-
-## Agents
-
-| pi-flow only (3) | Role |
-|------------------|------|
-| `pi-flow.doc-writer` | HTML artifacts |
-| `pi-flow.bd-keeper` | Beads + pointers |
-| `pi-flow.cmux-verifier` | One-shot doc verify |
-
-| pi-subagents (builtins) | Role |
-|-------------------------|------|
-| `worker` | Implement |
-| `reviewer` | Review |
-| `oracle` | Second opinion |
-| `planner` | Implementation plan |
-| `scout` · `researcher` | Recon · web/MCP |
-
-**Boss/follow:** `/pf-agents` · `/pf-follow` · `/pf-boss` — `docs/SUBAGENTS-UX.md`
-
-## Tools
-
-`paperflow_host` · `paperflow_verify` · `paperflow_beads` · `paperflow_cmux` · `paperflow_active_goal`
-
-**Browser:** cmux → `:8767` paperflow · Browserbase MCP → external web (`/skill:browserbase`)
-
-## Install / update
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/FRIKKern/pi-flow/main/scripts/quickstart.sh | bash
-curl -fsSL https://raw.githubusercontent.com/FRIKKern/pi-flow/main/scripts/update.sh | bash
-```
-
-In Pi: `/pi-flow-setup` · `/pi-flow-status` · `/pi-flow-handoff` · `/pi-flow-update`
-
-## Docs
-
-`docs/SUBAGENTS-UX.md` · `docs/CMUX.md` · `docs/BROWSERBASE.md` · `docs/BEST-PRACTICES.md` · `docs/EDITING.md` · `docs/BEADS.md` · `docs/HOST.md`
+This file provides instructions and context for AI coding agents working on this project.
 
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:7510c1e2 -->
 ## Beads Issue Tracker
@@ -94,3 +49,22 @@ bd close <id>         # Complete work
 - NEVER say "ready to push when you are" - YOU must push
 - If push fails, resolve and retry until it succeeds
 <!-- END BEADS INTEGRATION -->
+
+
+## Build & Test
+
+_Add your build and test commands here_
+
+```bash
+# Example:
+# npm install
+# npm test
+```
+
+## Architecture Overview
+
+_Add a brief overview of your project architecture_
+
+## Conventions & Patterns
+
+_Add your project-specific conventions here_
