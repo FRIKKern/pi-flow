@@ -1,6 +1,6 @@
 {
   "name": "pi-flow",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "description": "Paperflow lifecycle in Pi (CMUX): goal → plan → grill → build → review. HTML artifacts, Beads, MCP subagents. Model-agnostic; Composer 2.5 default.",
   "type": "module",
   "license": "MIT",

@@ -21,6 +21,10 @@ else
 	DEPS_SCRIPT="${TMPDIR_PF}/install-deps.sh"
 	curl -fsSL "${RAW_BASE}/scripts/install-deps.sh" -o "$DEPS_SCRIPT" \
 		|| die "could not download install-deps.sh"
+	curl -fsSL "${RAW_BASE}/scripts/install-cmux-shell.sh" -o "${TMPDIR_PF}/install-cmux-shell.sh"
+	curl -fsSL "${RAW_BASE}/scripts/cmux-boss-layout.sh" -o "${TMPDIR_PF}/cmux-boss-layout.sh"
+	chmod +x "${TMPDIR_PF}/install-cmux-shell.sh" "${TMPDIR_PF}/cmux-boss-layout.sh"
+	export PI_FLOW_SCRIPTS_TMP="$TMPDIR_PF"
 fi
 
 info "pi-flow update"

@@ -1,10 +1,30 @@
 #!/usr/bin/env bash
 # Install cmux-boss-layout + pf/pif zsh aliases (~/.local/bin, ~/.zshrc).
 # Called from pi-flow quickstart, install-deps, and /pi-flow-setup.
-set -euo pipefail
+set -eo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SOURCE="${SCRIPT_DIR}/cmux-boss-layout.sh"
+RAW_BASE="${PI_FLOW_RAW_BASE:-https://raw.githubusercontent.com/FRIKKern/pi-flow/main}"
+
+if [ -n "${PI_FLOW_SCRIPTS_TMP:-}" ] && [ -d "${PI_FLOW_SCRIPTS_TMP}" ]; then
+  SCRIPT_DIR="${PI_FLOW_SCRIPTS_TMP}"
+elif [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+else
+  SCRIPT_DIR=""
+fi
+
+SOURCE=""
+if [ -n "$SCRIPT_DIR" ]; then
+  SOURCE="${SCRIPT_DIR}/cmux-boss-layout.sh"
+fi
+if [[ -z "$SCRIPT_DIR" || ! -f "$SOURCE" ]]; then
+  SCRIPT_DIR="$(mktemp -d -t pi-flow-cmux-install.XXXXXX)"
+  SOURCE="${SCRIPT_DIR}/cmux-boss-layout.sh"
+  curl -fsSL "${RAW_BASE}/scripts/cmux-boss-layout.sh" -o "$SOURCE" \
+    || { printf '✗ could not download cmux-boss-layout.sh\n' >&2; exit 1; }
+  chmod +x "$SOURCE"
+fi
+
 DEST="${HOME}/.local/bin/cmux-boss-layout"
 ZSHRC="${HOME}/.zshrc"
 MARKER="# pi-flow cmux shell (pf / pif)"

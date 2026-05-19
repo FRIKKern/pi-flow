@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # pi-flow dependency installer — beads (bd), jq, browse (Browserbase), optional cmux hint
 # Used by quickstart.sh and documented for manual re-runs.
-set -euo pipefail
+set -eo pipefail
 
 YES="${PI_FLOW_YES:-${PAPERFLOW_YES:-0}}"
+RAW_BASE="${PI_FLOW_RAW_BASE:-https://raw.githubusercontent.com/FRIKKern/pi-flow/main}"
 
 info() { printf '\033[36m→\033[0m %s\n' "$*"; }
 ok() { printf '\033[32m✓\033[0m %s\n' "$*"; }
@@ -86,17 +87,56 @@ init_beads_repo() {
   (cd "$dir" && bd init) && ok "bd init in $dir" || warn "bd init failed"
 }
 
-install_cmux_shell() {
-  local script=""
+# Directory containing install-cmux-shell.sh + cmux-boss-layout.sh (repo, PI_FLOW_SCRIPTS_TMP, or download)
+resolve_scripts_dir() {
+  if [ -n "${PI_FLOW_SCRIPTS_TMP:-}" ] \
+    && [ -f "${PI_FLOW_SCRIPTS_TMP}/install-cmux-shell.sh" ] \
+    && [ -f "${PI_FLOW_SCRIPTS_TMP}/cmux-boss-layout.sh" ]; then
+    echo "${PI_FLOW_SCRIPTS_TMP}"
+    return 0
+  fi
   if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
-    script="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/install-cmux-shell.sh"
+    local dir
+    dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    if [ -f "${dir}/install-cmux-shell.sh" ] && [ -f "${dir}/cmux-boss-layout.sh" ]; then
+      echo "$dir"
+      return 0
+    fi
   fi
-  if [[ -f "$script" ]]; then
-    info "Installing cmux boss layout (pf / pif)…"
-    bash "$script" || warn "cmux shell install had issues"
-  else
+  echo ""
+  return 1
+}
+
+fetch_cmux_scripts() {
+  local dir="${1:-}"
+  if [ -z "$dir" ]; then
+    dir="$(mktemp -d -t pi-flow-cmux.XXXXXX)"
+  fi
+  info "Downloading cmux shell scripts…"
+  curl -fsSL "${RAW_BASE}/scripts/install-cmux-shell.sh" -o "${dir}/install-cmux-shell.sh" \
+    || return 1
+  curl -fsSL "${RAW_BASE}/scripts/cmux-boss-layout.sh" -o "${dir}/cmux-boss-layout.sh" \
+    || return 1
+  chmod +x "${dir}/install-cmux-shell.sh" "${dir}/cmux-boss-layout.sh"
+  echo "$dir"
+}
+
+install_cmux_shell() {
+  local dir script
+  dir="$(resolve_scripts_dir)" || dir=""
+  if [ -z "$dir" ]; then
+    dir="$(fetch_cmux_scripts)" || {
+      warn "install-cmux-shell.sh not found — skip pf/pif aliases"
+      return 1
+    }
+  fi
+  script="${dir}/install-cmux-shell.sh"
+  if [[ ! -f "$script" || ! -f "${dir}/cmux-boss-layout.sh" ]]; then
     warn "install-cmux-shell.sh not found — skip pf/pif aliases"
+    return 1
   fi
+  info "Installing cmux boss layout (pf / pif)…"
+  PI_FLOW_SCRIPTS_TMP="$dir" bash "$script" || warn "cmux shell install had issues"
 }
 
 main() {
