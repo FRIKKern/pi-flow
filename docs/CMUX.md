@@ -71,16 +71,31 @@ Set automatically in **cmux terminal surfaces** (required for pi-flow):
 
 **Rule:** Run Pi only inside a cmux terminal surface when you want full paperflow integration. Outside cmux: `paperflow-cmux-detect` exits 1, docs fall back to OS browser, verify → SKIP.
 
-## Recommended first-time layout
+## Browser pane (attach — default)
 
-```bash
-# From repo root (after paperflow + pi-flow install)
-./node_modules/pi-flow/scripts/cmux-layout.sh "$(pwd)" my-goal
-# Or from pi-flow clone:
-scripts/cmux-layout.sh ~/path/to/repo my-goal
+From **boss Pi** in an existing cmux workspace:
+
+```text
+paperflow_cmux({ action: "open", url: "http://localhost:8767/paperflow/plans/…" })
 ```
 
-This runs `cmux new-workspace --name pi-flow:… --cwd … --command pi --focus true`. Then manually split right and open browser to `http://localhost:8767/` if not auto-created.
+Or shell (same workspace, no new Pi):
+
+```bash
+scripts/cmux-layout.sh browserbase
+# or
+scripts/cmux-layout.sh --url "http://localhost:8767/paperflow/plans/foo.html"
+```
+
+Uses `CMUX_WORKSPACE_ID` — opens browser beside your **current** Pi. Build/review run via **subagents** in that Pi (`/pf-follow`).
+
+## First-time layout only (`--new-workspace`)
+
+```bash
+scripts/cmux-layout.sh --new-workspace "$(pwd)" my-goal
+```
+
+Creates a new cmux workspace with Pi + browser. Use once; prefer attach + subagents afterward.
 
 **Manual layout:**
 

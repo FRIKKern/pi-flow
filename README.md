@@ -53,11 +53,13 @@ Or inside Pi:
 
 ## First run (60 seconds)
 
-**1. Shell** — cmux workspace (recommended):
+**1. cmux** — open paperflow in your **current** workspace (no second Pi):
 
 ```bash
 cd your-repo
-curl -fsSL https://raw.githubusercontent.com/FRIKKern/pi-flow/main/scripts/cmux-layout.sh | bash -s -- "$(pwd)" my-goal
+scripts/cmux-layout.sh my-goal
+# first machine only:
+# scripts/cmux-layout.sh --new-workspace "$(pwd)" my-goal
 ```
 
 **2. Pi** — terminal pane:
