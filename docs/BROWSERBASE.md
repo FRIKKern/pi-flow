@@ -4,18 +4,29 @@ pi-flow ships **Browserbase MCP** (cloud browser + Stagehand) and the **`browse`
 
 ## Quick setup
 
-```bash
-# 1. CLI
-npm install -g browse
-npm update -g browse   # if already installed
+```text
+/pi-flow-setup
+```
 
-# 2. API key (never commit)
-export BROWSERBASE_API_KEY="…"   # https://browserbase.com/settings
-browse cloud projects list
+Or only Browserbase:
 
-# 3. Pi MCP config
+```text
 /pi-flow-browserbase-setup
 /reload
+```
+
+This automatically:
+
+- Installs `browse` to `~/.pi/agent/bin` (falls back to global npm or `npx`)
+- Merges hosted MCP into `~/.pi/agent/mcp.json`
+- Loads `~/.pi/agent/browserbase.env` and verifies `browse cloud projects list`
+
+Manual API key (never commit):
+
+```bash
+# ~/.pi/agent/browserbase.env
+BROWSERBASE_API_KEY=…
+BROWSERBASE_PROJECT_ID=…
 ```
 
 Optional persistent env file (chmod 600):
