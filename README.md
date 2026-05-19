@@ -135,6 +135,7 @@ We do **not** ship ten duplicate roles — see [lib/orchestrator.md](./lib/orche
 | `/pi-flow-install-deps` | beads + jq only |
 | `/pi-flow-cmux-layout` | cmux workspace recipe |
 | `/pi-flow-browserbase-setup` | browse CLI + Browserbase MCP config |
+| Shell `pf` / `pif` | cmux boss layout (cc vs Pi) — installed on setup |
 
 ---
 

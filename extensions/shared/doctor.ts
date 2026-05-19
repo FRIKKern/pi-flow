@@ -10,6 +10,11 @@ import {
 	checkBrowserbaseMcpConfig,
 	checkBrowseCli,
 } from "./browserbase.ts";
+import {
+	checkCmuxBossLayout,
+	checkCmuxCli,
+	checkPfPifAliases,
+} from "./cmux-shell.ts";
 import { loadStreamedRules } from "./streamed-rules.ts";
 
 export interface DoctorCheck {
@@ -58,13 +63,17 @@ export async function runPiFlowDoctor(
 			: `${host.detail} — use paperflow_host ensure or paperflow quickstart`,
 	});
 
+	checks.push(checkCmuxCli());
+	checks.push(checkCmuxBossLayout());
+	checks.push(checkPfPifAliases());
+
 	const cmux = await cmuxDetectJson();
 	checks.push({
-		name: "cmux",
+		name: "cmux session",
 		status: isInCmux(cmux) ? "pass" : "warn",
 		detail: isInCmux(cmux)
 			? `ready (${String(cmux?.workspace ?? process.env.CMUX_WORKSPACE_ID ?? "").slice(0, 12)}…)`
-			: "not detected — optional; see docs/CMUX.md",
+			: "not in cmux terminal — optional; see docs/CMUX.md",
 	});
 
 	const rules = loadStreamedRules(cwd);

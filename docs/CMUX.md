@@ -20,6 +20,25 @@ pi-flow is built to run **inside [cmux](https://github.com/manaflow-ai/cmux)** w
 | paperflow host | `curl -fsSL https://raw.githubusercontent.com/FRIKKern/paperflow/main/scripts/quickstart.sh \| bash` |
 | pi-flow | `pi install git:github.com/FRIKKern/pi-flow` → `/pi-flow-setup` |
 
+## Boss layout shortcuts (`pf` / `pif`)
+
+Installed automatically by `/pi-flow-setup` and `scripts/quickstart.sh`:
+
+| Alias | Command | Layout |
+|-------|---------|--------|
+| `pf` | `cmux-boss-layout` | Boss + 4 workers + browser — **Claude Code** (`cc`) |
+| `pif` | `cmux-boss-layout --pi` | Same geometry — **Pi** in all agent panes |
+
+```bash
+# From any repo (after source ~/.zshrc)
+pif --cwd ~/my-repo --name my-goal
+# Browser pane defaults to http://localhost:8767/ for --pi
+
+pf --cwd ~/my-repo --url https://example.com
+```
+
+Manual install: `bash scripts/install-cmux-shell.sh` (copies to `~/.local/bin`, patches `~/.zshrc`).
+
 ## Topology & handles
 
 | Concept | Meaning |

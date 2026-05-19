@@ -1,6 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { ensureBrowseCli } from "./browserbase.ts";
+import { installCmuxShell } from "./cmux-shell.ts";
 import { commandExists, runCommand } from "./exec.ts";
 import { resolvePackageRoot } from "./package-root.ts";
 
@@ -49,6 +50,7 @@ export async function ensurePiFlowDeps(
 	results.push(await ensureBd(packageRoot, options.installGlobalBd !== false));
 	results.push(await ensureJq());
 	results.push(await ensureBrowse());
+	results.push(await ensureCmuxShell(packageRoot));
 	results.push(checkGit());
 
 	if (options.initBeads !== false) {
@@ -159,6 +161,15 @@ async function ensureBrowse(): Promise<DepInstallResult> {
 	return {
 		name: "browserbase CLI (browse)",
 		status: result.ok ? (result.detail.includes("installed") ? "installed" : "present") : "failed",
+		detail: result.detail,
+	};
+}
+
+async function ensureCmuxShell(packageRoot: string): Promise<DepInstallResult> {
+	const result = await installCmuxShell(packageRoot);
+	return {
+		name: "cmux shell (pf / pif)",
+		status: result.ok ? "installed" : "failed",
 		detail: result.detail,
 	};
 }

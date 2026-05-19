@@ -86,11 +86,23 @@ init_beads_repo() {
   (cd "$dir" && bd init) && ok "bd init in $dir" || warn "bd init failed"
 }
 
+install_cmux_shell() {
+  local script
+  script="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/install-cmux-shell.sh"
+  if [[ -f "$script" ]]; then
+    info "Installing cmux boss layout (pf / pif)…"
+    bash "$script" || warn "cmux shell install had issues"
+  else
+    warn "install-cmux-shell.sh not found — skip pf/pif aliases"
+  fi
+}
+
 main() {
   need_node
   install_bd || true
   install_jq || true
   install_browse || true
+  install_cmux_shell || true
 
   if command -v git >/dev/null 2>&1; then ok "git: ok"; else warn "git not found"; fi
 

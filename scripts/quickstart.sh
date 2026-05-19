@@ -90,7 +90,9 @@ In Pi:
   /skill:autopilot "your vision"
 
 cmux (recommended):
-  curl -fsSL https://raw.githubusercontent.com/FRIKKern/pi-flow/main/scripts/cmux-layout.sh | bash -s -- "$(pwd)" my-goal
+  source ~/.zshrc   # pf / pif aliases
+  pif --cwd "$(pwd)" my-goal    # boss layout + Pi + :8767 browser
+  # or simple: scripts/cmux-layout.sh "$(pwd)" my-goal
 
 Updates later:
   curl -fsSL https://raw.githubusercontent.com/FRIKKern/pi-flow/main/scripts/update.sh | bash
