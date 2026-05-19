@@ -146,6 +146,110 @@ export async function cmuxBrowserOpen(url: string): Promise<string> {
 	return stdout.trim();
 }
 
+async function readScopePointer(
+	bin: string,
+	kind: "goal" | "phase",
+): Promise<string | null> {
+	try {
+		const { stdout } = await execFileAsync(bin, ["--read", kind], {
+			env: process.env,
+			timeout: 3000,
+		});
+		return stdout.trim() || null;
+	} catch (error: unknown) {
+		const err = error as { stdout?: string };
+		const value = err.stdout?.trim();
+		return value || null;
+	}
+}
+
+export async function readScopedGoalIds(): Promise<{
+	goalId: string | null;
+	phaseId: string | null;
+	scope: string | null;
+}> {
+	const bin = PAPERFLOW_BIN.activeScope();
+	if (!fs.existsSync(bin)) {
+		return { goalId: null, phaseId: null, scope: null };
+	}
+
+	const [goalId, phaseId] = await Promise.all([
+		readScopePointer(bin, "goal"),
+		readScopePointer(bin, "phase"),
+	]);
+
+	let scope: string | null = null;
+	try {
+		const { stdout } = await execFileAsync(bin, ["--resolve"], {
+			env: process.env,
+			timeout: 3000,
+		});
+		scope = stdout.trim() || null;
+	} catch {
+		scope = null;
+	}
+
+	return { goalId, phaseId, scope };
+}
+
+export async function writeScopedGoalPointers(
+	goalId: string,
+	phaseId?: string,
+): Promise<void> {
+	const bin = PAPERFLOW_BIN.activeScope();
+	if (!fs.existsSync(bin)) return;
+
+	try {
+		await execFileAsync(bin, ["--write", "goal", goalId.trim()], {
+			env: process.env,
+			timeout: 3000,
+		});
+		if (phaseId) {
+			await execFileAsync(bin, ["--write", "phase", phaseId.trim()], {
+				env: process.env,
+				timeout: 3000,
+			});
+		}
+	} catch {
+		// optional — legacy repo pointers still work
+	}
+}
+
+export async function cmuxIdentifyJson(): Promise<{
+	workspaceRef?: string;
+	paneRef?: string;
+	surfaceRef?: string;
+	surfaceType?: string;
+	tabRef?: string;
+} | null> {
+	try {
+		const { stdout } = await execFileAsync("cmux", ["identify", "--json"], {
+			env: process.env,
+			timeout: 3000,
+		});
+		const parsed = JSON.parse(stdout) as {
+			caller?: {
+				workspace_ref?: string;
+				pane_ref?: string;
+				surface_ref?: string;
+				surface_type?: string;
+				tab_ref?: string;
+			};
+		};
+		const caller = parsed.caller;
+		if (!caller) return null;
+		return {
+			workspaceRef: caller.workspace_ref,
+			paneRef: caller.pane_ref,
+			surfaceRef: caller.surface_ref,
+			surfaceType: caller.surface_type,
+			tabRef: caller.tab_ref,
+		};
+	} catch {
+		return null;
+	}
+}
+
 export function readActiveGoalContext(cwd: string): ActiveGoalContext | null {
 	const goalPath = path.join(cwd, ".paperflow", "active-goal");
 	const phasePath = path.join(cwd, ".paperflow", "active-phase");
@@ -181,6 +285,7 @@ export function writeActiveGoalPointers(
 	if (phaseId) {
 		fs.writeFileSync(path.join(dir, "active-phase"), `${phaseId.trim()}\n`, "utf8");
 	}
+	void writeScopedGoalPointers(goalId, phaseId);
 }
 
 function readTrimmedFile(filePath: string): string | null {

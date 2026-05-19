@@ -36,6 +36,13 @@ export async function bdShow(
 	return runBd(["show", id, "--json"], cwd);
 }
 
+export async function bdList(
+	args: string[],
+	cwd = process.cwd(),
+): Promise<{ ok: true; stdout: string } | { ok: false; error: string }> {
+	return runBd(["list", ...args, "--json"], cwd);
+}
+
 export async function bdEnsureRepo(
 	cwd = process.cwd(),
 ): Promise<{ ok: true; stdout: string } | { ok: false; error: string }> {
