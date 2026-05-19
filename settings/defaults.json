@@ -3,15 +3,16 @@
   "defaultModel": "composer-2.5",
   "defaultThinkingLevel": "medium",
   "enabledModels": ["composer-2.5", "composer-2.5-fast"],
-  "packages": ["pi-cursor"],
+  "packages": ["pi-flow"],
   "subagents": {
     "agentOverrides": {
       "scout": { "model": "composer-2.5" },
       "researcher": { "model": "composer-2.5" },
-      "planner": { "model": "composer-2.5" },
       "worker": { "model": "composer-2.5" },
       "reviewer": { "model": "composer-2.5" },
-      "oracle": { "model": "composer-2.5" }
+      "oracle": { "model": "composer-2.5" },
+      "planner": { "model": "composer-2.5" },
+      "doc-writer": { "model": "composer-2.5" }
     }
   }
 }

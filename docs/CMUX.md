@@ -1,42 +1,32 @@
-# pi-cursor i CMUX
+# pi-flow in CMUX
 
-pi-cursor er ment å kjøre **primært i cmux** sammen med paperflow host.
+pi-flow is designed to run **inside cmux** alongside the **paperflow host**.
 
-## Layout (forslag)
+## Recommended layout
 
 ```text
-┌─────────────────────────────────────────────┐
-│ cmux: Pi pane (pi-cursor, Composer 2.5)      │
-├─────────────────────────────────────────────┤
-│ cmux: browser — plan/grill @ :8767         │
-├─────────────────────────────────────────────┤
-│ cmux: dock — paperflow feeds (optional)      │
-└─────────────────────────────────────────────┘
+┌─ cmux workspace ─────────────────────────────┐
+│ Pi pane      →  pi-flow, /skill:autopilot …   │
+│ Browser pane →  plan/grill @ localhost:8767   │
+│ Dock         →  paperflow feeds (optional)    │
+└──────────────────────────────────────────────┘
 ```
 
 ## Setup
 
-1. Install cmux: `brew tap manaflow-ai/cmux && brew install --cask cmux`
-2. Install paperflow host (quickstart fra FRIKKern/paperflow)
-3. Install Pi: `npm i -g @earendil-works/pi-coding-agent`
-4. Install pi-cursor: `pi install git:github.com/FRIKKern/pi-cursor`
-5. I prosjekt-repo: `pi` → `/pi-cursor-setup` → `/login cursor`
+1. cmux — `brew install --cask cmux`
+2. paperflow — `curl -fsSL https://raw.githubusercontent.com/FRIKKern/paperflow/main/scripts/quickstart.sh | bash`
+3. Pi — `npm i -g @earendil-works/pi-coding-agent`
+4. pi-flow — `pi install git:github.com/FRIKKern/pi-flow` → `/pi-flow-setup`
 
-## Browser
+Model: any Pi provider. Default after setup is `composer-2.5` via `/login cursor` — change with `/model` if you prefer Anthropic/OpenAI/etc.
 
-- Med paperflow: docs åpnes automatisk til `http://localhost:8767/paperflow/...`
-- Manuelt: `cmux browser open <url eller file://…>`
-- Grill Submit i browser → bridge → melding i aktiv terminal (paperflow); Pi må være fokusert i riktig pane
+## Grill in cmux
 
-## Pi i cmux workspace
+With paperflow host: fill grill in browser → Submit → message lands in the Pi pane (bridge).
 
-- Én Pi-session per workspace; `.paperflow/active-*` er per repo
-- `pf goal "…"` (paperflow CLI) kan spawne Claude med slash — for Pi bruk direkte `/skill:paperflow-goal`
+Without host: paste grill questions in Pi; user replies in chat before revise.
 
-## Verifikasjon
+## pf CLI vs Pi
 
-paperflow `paperflow-doc-verify` er for HTML @ :8767. I Pi: bruk reviewer + ev. `mcp:chrome-devtools` for UI-tasks.
-
-## Uten cmux
-
-Pi + paperflow daemon i vanlig browser fungerer; dock og cmux-verifier blir SKIP.
+paperflow's `pf goal "…"` targets Claude Code. In cmux with Pi, use `/skill:goal` or `/skill:autopilot` in the Pi pane instead.

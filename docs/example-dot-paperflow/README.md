@@ -1,10 +1,10 @@
 # Eksempel: `.paperflow/` i prosjektrepo
 
-Kopier til prosjektrot når du starter paperflow-goal:
+Kopier til prosjektrot når du starter goal:
 
 ```bash
 mkdir -p .paperflow
-# Fylles av /skill:paperflow-goal:
+# Fylles av /skill:goal:
 #   active-goal   → bd epic task id
 #   active-phase  → bd phase task id
 ```

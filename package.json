@@ -1,23 +1,23 @@
 {
-  "name": "pi-cursor",
-  "version": "0.2.0",
-  "description": "Pi harness for CMUX: Composer 2.5, MCP subagents, paperflow goal/plan/grill/build/review workflow",
+  "name": "pi-flow",
+  "version": "0.3.0",
+  "description": "Paperflow lifecycle in Pi (CMUX): goal → plan → grill → build → review. HTML artifacts, Beads, MCP subagents. Model-agnostic; Composer 2.5 default.",
   "type": "module",
   "license": "MIT",
   "keywords": [
     "pi-package",
     "pi",
     "pi-coding-agent",
-    "cursor",
-    "composer",
-    "mcp",
-    "subagents",
     "paperflow",
-    "cmux"
+    "pi-flow",
+    "cmux",
+    "beads",
+    "mcp",
+    "subagents"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/FRIKKern/pi-cursor.git"
+    "url": "git+https://github.com/FRIKKern/pi-flow.git"
   },
   "files": [
     "agents/",
@@ -34,15 +34,15 @@
     "FORKS.md"
   ],
   "bin": {
-    "pi-cursor": "./bin/pi-cursor"
+    "pi-flow": "./bin/pi-flow"
   },
   "scripts": {
     "postinstall": "node scripts/verify-bundled-deps.mjs"
   },
   "pi": {
-    "image": "https://raw.githubusercontent.com/FRIKKern/pi-cursor/main/assets/logo.svg",
+    "image": "https://raw.githubusercontent.com/FRIKKern/pi-flow/main/assets/logo.svg",
     "extensions": [
-      "./extensions/pi-cursor-core/index.ts",
+      "./extensions/pi-flow-core/index.ts",
       "node_modules/pi-cursor-provider/index.ts",
       "node_modules/pi-mcp-adapter/index.ts",
       "node_modules/pi-subagents/src/extension/index.ts"
@@ -50,9 +50,6 @@
     "skills": [
       "./skills",
       "node_modules/pi-subagents/skills"
-    ],
-    "prompts": [
-      "./prompts"
     ],
     "prompts": [
       "./prompts",

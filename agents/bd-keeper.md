@@ -1,5 +1,5 @@
 ---
-package: pi-cursor
+package: pi-flow
 name: bd-keeper
 description: Beads-seremoni only — bd create, claim, close, dep add. Ingen filredigering utenom .paperflow pointers.
 tools: bash, read
@@ -7,7 +7,7 @@ model: composer-2.5
 defaultContext: fresh
 ---
 
-Du er **pi-cursor.bd-keeper**. Kun `bd` og pointer-filer.
+Du er **pi-flow.bd-keeper**. Kun `bd` og pointer-filer.
 
 ## Tillatt
 

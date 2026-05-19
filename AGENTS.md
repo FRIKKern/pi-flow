@@ -1,73 +1,52 @@
-# pi-cursor — CMUX + Paperflow
+# pi-flow — paperflow in Pi (CMUX)
 
-Pi-distribusjon for **[cmux](https://github.com/manaflow-ai/cmux)** med arbeidsflyt lært fra **[FRIKKern/paperflow](https://github.com/FRIKKern/paperflow)**.
+You run in **[Pi](https://pi.dev/)** with **pi-flow** — a port of [FRIKKern/paperflow](https://github.com/FRIKKern/paperflow) orchestration. **Cursor is only a model provider** (default `composer-2.5` after setup); the product is the paperflow lifecycle.
 
-**Modell:** Composer 2.5 only (`/login cursor`, `/model` → composer-2.5).
-
-## Mental model (paperflow)
+## Lifecycle
 
 ```text
-Goal → Plan (HTML) → Grill (pause) → Revise → Build (bd loop) → Review
+goal → plan (HTML) → grill (pause) → revise → build → review
 ```
 
-- **HTML er planleggingsformatet** — ikke engangs-Markdown i chat (`~/docs/paperflow/...` + localhost:8767 når host er installert).
-- **Beads (`bd`)** er persistent state; pointers i `.paperflow/active-{goal,phase}`.
-- **Orchestrator koordinerer**; subagenter implementerer (se `lib/paperflow-thresholds.md`).
+- **HTML** is the planning artifact (`~/docs/paperflow/...` when paperflow host is installed).
+- **Beads (`bd`)** is the task graph; pointers in `.paperflow/active-{goal,phase}`.
+- Read **`lib/paperflow-thresholds.md`** on every orchestration turn.
 
-## CMUX stack (anbefalt)
+## Skills
 
-| Lag | Rolle |
-|-----|--------|
-| **cmux** | Terminal + browser + dock |
-| **paperflow host** | `install.sh` — daemon, grill Submit → terminal, doc auto-open |
-| **Pi + pi-cursor** | Composer 2.5, MCP subagents, `/skill:paperflow-*` |
-
-Uten paperflow host: Pi + `docs/paperflow/*.html` + grill-svar i chat fungerer fortsatt.
-
-## Skills (slash i Pi)
-
-| Skill | Når |
+| Skill | Use |
 |-------|-----|
-| `/skill:paperflow-goal` | Nytt mål, epic + faser |
-| `/skill:paperflow-plan` | Draft → grill → revise |
-| `/skill:paperflow-build` | Claim → worker → verify → close |
-| `/skill:paperflow-review` | Approve / reject |
-| `/skill:paperflow-autopilot` | Hele kjeden (pauser ved grill) |
-| `/skill:paperflow-resume` | Bytt aktiv Goal |
-| `/skill:pi-cursor` | Kort agent-referanse |
+| `/skill:goal` | Open Goal, epic + 3 phases |
+| `/skill:plan` | Draft → grill → revise |
+| `/skill:build` | claim → worker → verify → close |
+| `/skill:review` | Approve / reject |
+| `/skill:autopilot` | Full chain (stops at grill) |
+| `/skill:resume` | Switch Goal |
 
-## Agenter (pi-cursor.*)
+## Agents (package `pi-flow`)
 
-| Agent | Rolle |
-|-------|--------|
-| `doc-writer` | HTML plan/grill/spec (ingen bash) |
-| `bd-keeper` | Kun `bd` + pointers |
-| `scout` | Kodegraving + MCP |
-| `researcher` | Ekstern research + MCP |
-| `planner` | Lett plan (når ikke full HTML-plan) |
-| `worker` | Implementering |
-| `reviewer` | Review / verify evidence |
-| `oracle` | Second opinion |
+| Agent | Role |
+|-------|------|
+| `pi-flow.doc-writer` | HTML only — plans, grills, goals |
+| `pi-flow.bd-keeper` | `bd` + pointers only |
+| `pi-flow.scout` | Code + MCP |
+| `pi-flow.researcher` | External docs + MCP |
+| `pi-flow.worker` | Implementation |
+| `pi-flow.reviewer` | Review / verify |
+| `pi-flow.planner` | Light outline only — full plans → doc-writer |
+| `pi-flow.oracle` | Second opinion |
 
-## Subagent thresholds (obligatorisk)
+## CMUX
 
-Les `lib/paperflow-thresholds.md`. >30 LOC / >50 prose / >500 token evidence → dispatch. Commits >30 LOC: `Subagent-Run: <task-id>`.
+- Install [paperflow host](https://github.com/FRIKKern/paperflow) for :8767, grill Submit, dock.
+- Pi pane runs pi-flow; browser pane shows plan/grill HTML.
+- Without host: grill answers in chat; artifacts under `docs/paperflow/`.
 
-## MCP
+## Commands
 
-- `scout` / `researcher`: `mcp:` i agent frontmatter
-- Konfig: `.mcp.json` + `/mcp setup`
-- Subagenter får ikke MCP uten eksplisitt `tools: …, mcp:server`
+- `/pi-flow-setup`, `/pi-flow-doctor`
+- `/mcp` — MCP servers
 
-## Typisk autopilot i cmux
+## Upstream spec
 
-```text
-/skill:paperflow-autopilot "rewrite onboarding flow"
-```
-
-Du leser plan + grill i cmux browser; svar Submit (bridge) eller i Pi-chat; build/review kjører via subagenter.
-
-## Upstream
-
-- Spec: https://github.com/FRIKKern/paperflow/blob/main/ARCHITECTURE.md
-- Docs: `docs/PAPERFLOW.md`, `docs/CMUX.md` i dette repoet
+https://github.com/FRIKKern/paperflow/blob/main/ARCHITECTURE.md

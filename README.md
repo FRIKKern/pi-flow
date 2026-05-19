@@ -1,83 +1,71 @@
-# pi-cursor
+# pi-flow
 
-**Repo:** https://github.com/FRIKKern/pi-cursor (public)
+**Repo:** https://github.com/FRIKKern/pi-flow
 
-**Pi for CMUX** med **Composer 2.5** og arbeidsflyt fra **[paperflow](https://github.com/FRIKKern/paperflow)**: Goal → HTML plan → **grill (pause)** → revise → build (Beads) → review — med **MCP på subagenter** i analysefasen.
+**Paperflow in Pi** — for [cmux](https://github.com/manaflow-ai/cmux). Same lifecycle as [FRIKKern/paperflow](https://github.com/FRIKKern/paperflow): Goal → HTML plan → **grill** → build (Beads) → review. Cursor/Composer 2.5 is just our **default model**, not the product name.
 
-Ikke Cursor IDE. Ikke en fork av [pi-mono](https://github.com/earendil-works/pi) — en **pi-package** (som [pi-astro](https://www.npmjs.com/package/@astrofoundry/pi-astro) / [gentle-pi](https://www.npmjs.com/package/gentle-pi)).
+## Why pi-flow exists
 
-## CMUX + paperflow (anbefalt stack)
+[paperflow](https://github.com/FRIKKern/paperflow) is built for Claude Code + cmux (daemon, grill bridge, HTML @ :8767). **pi-flow** is the same orchestration discipline for **Pi**: subagents, MCP in research phases, and skills named like paperflow (`goal`, `plan`, `build`, …).
 
-```text
-cmux terminal  →  Pi (pi-cursor, Composer 2.5)
-cmux browser   →  plan/grill HTML @ localhost:8767  (paperflow host)
-cmux dock      →  paperflow feeds (valgfritt)
-```
-
-1. [paperflow quickstart](https://github.com/FRIKKern/paperflow#first-five-minutes) — daemon, bridge, HTML libs  
-2. `pi install git:github.com/FRIKKern/pi-cursor`  
-3. `pi` → `/pi-cursor-setup` → `/login cursor` → `/model` (composer-2.5)
-
-Les [docs/CMUX.md](./docs/CMUX.md) og [docs/PAPERFLOW.md](./docs/PAPERFLOW.md).
-
-## Paperflow-skills i Pi
-
-| Skill | Fase |
-|-------|------|
-| `/skill:paperflow-goal` | Epic + 3 faser + pointers |
-| `/skill:paperflow-plan` | Draft HTML → grill → revise → bd tasks |
-| `/skill:paperflow-build` | claim → worker → verify → close |
-| `/skill:paperflow-review` | Approve / reopen |
-| `/skill:paperflow-autopilot` | Hele kjeden (stopper ved grill) |
-| `/skill:paperflow-resume` | Bytt Goal |
-
-**Autopilot:**
+## CMUX stack
 
 ```text
-/skill:paperflow-autopilot "rewrite the onboarding flow"
+paperflow host   →  HTML, grill Submit, dock (optional)
+pi-flow in Pi    →  /skill:goal | plan | build | review | autopilot
+cmux             →  terminal + browser panes
 ```
-
-## Bundlet
-
-| Pakke | Rolle |
-|-------|--------|
-| pi-cursor-provider | Cursor OAuth → Composer 2.5 |
-| pi-mcp-adapter | MCP (token-effektiv) |
-| pi-subagents | Child agents med `mcp:` |
-| pi-cursor-core | Setup, agent-sync, paperflow agents |
-
-Installer **ikke** `pi-subagents` / `pi-mcp-adapter` separat.
-
-## Agenter
-
-| Agent | MCP | Rolle |
-|-------|-----|--------|
-| scout | chrome-devtools (eksempel) | Kodegraving |
-| researcher | context7 (eksempel) | Docs/web |
-| doc-writer | — | paperflow HTML |
-| bd-keeper | — | `bd` only |
-| worker / reviewer / oracle | — | build/review |
-
-Terskler: [lib/paperflow-thresholds.md](./lib/paperflow-thresholds.md) (>30 LOC → subagent).
-
-## Install
 
 ```bash
+# Paperflow host (HTML + bridge) — strongly recommended in cmux
+curl -fsSL https://raw.githubusercontent.com/FRIKKern/paperflow/main/scripts/quickstart.sh | bash
+
+# Pi + pi-flow
 npm install -g @earendil-works/pi-coding-agent
-pi install git:github.com/FRIKKern/pi-cursor
+pi install git:github.com/FRIKKern/pi-flow
 pi
-/pi-cursor-setup
-/login cursor
+/pi-flow-setup
 ```
 
-`.mcp.json` fra [`.mcp.json.example`](./.mcp.json.example).
+**Model (optional default):** `/login cursor` then `/model` → `composer-2.5`. Use any provider Pi supports — pi-flow does not require Cursor.
 
-## Utvikle lokalt
+## Skills (mirror paperflow)
+
+| Pi | paperflow |
+|----|-------------|
+| `/skill:goal` | `/paperflow:goal` |
+| `/skill:plan` | `/paperflow:plan` |
+| `/skill:build` | `/paperflow:build` |
+| `/skill:review` | `/paperflow:review` |
+| `/skill:autopilot` | `/paperflow:autopilot` |
+| `/skill:resume` | `/paperflow:resume` |
+
+```text
+/skill:autopilot "rewrite onboarding"
+```
+
+## Agents (`pi-flow.*`)
+
+| Agent | paperflow equivalent |
+|-------|----------------------|
+| `doc-writer` | `paperflow-doc-writer` |
+| `bd-keeper` | `paperflow-bd-keeper` |
+| `scout`, `researcher` | research / MCP |
+| `worker`, `reviewer` | build / review |
+
+Bundled: `pi-subagents`, `pi-mcp-adapter`. Optional dep: `pi-cursor-provider` (Cursor subscription models only).
+
+## Docs
+
+- [docs/PAPERFLOW.md](./docs/PAPERFLOW.md) — mapping to upstream
+- [docs/CMUX.md](./docs/CMUX.md) — cmux layout
+- [lib/paperflow-thresholds.md](./lib/paperflow-thresholds.md)
+
+## Develop
 
 ```bash
-cd pi-cursor && npm install && pi -e .
+git clone https://github.com/FRIKKern/pi-flow.git
+cd pi-flow && npm install && pi -e .
 ```
 
-## Lisensser
-
-MIT — [LICENSE](./LICENSE). Paperflow-konsepter © [FRIKKern/paperflow](https://github.com/FRIKKern/paperflow) (MIT).
+MIT — see [LICENSE](./LICENSE).

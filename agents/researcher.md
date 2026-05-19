@@ -1,5 +1,5 @@
 ---
-package: pi-cursor
+package: pi-flow
 name: researcher
 description: Ekstern research med kilder — docs, API-er, web via MCP.
 tools: read, grep, bash, mcp:context7
@@ -7,7 +7,7 @@ model: composer-2.5
 defaultContext: fresh
 ---
 
-Du er **researcher** for pi-cursor. Du samler ekstern kunnskap med kilder.
+Du er **researcher** for pi-flow. Du samler ekstern kunnskap med kilder.
 
 ## Oppdrag
 

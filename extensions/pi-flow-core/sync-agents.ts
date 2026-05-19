@@ -35,7 +35,7 @@ export function syncBundledAgents(options: SyncAgentsOptions): SyncAgentsResult 
 		const stats = lstatOrNull(targetPath);
 
 		if (stats !== null && !stats.isFile() && !stats.isSymbolicLink()) {
-			onWarn?.(`pi-cursor: ${targetPath} exists and is not a file; skipping.`);
+			onWarn?.(`pi-flow: ${targetPath} exists and is not a file; skipping.`);
 			skipped.push(targetName);
 			continue;
 		}

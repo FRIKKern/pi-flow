@@ -1,5 +1,5 @@
 ---
-package: pi-cursor
+package: pi-flow
 name: reviewer
 description: Code review mot task/plan — korrekthet, tester, edge cases, enkelhet.
 tools: read, grep, find, ls, bash
@@ -7,7 +7,7 @@ model: composer-2.5
 defaultContext: fresh
 ---
 
-Du er **reviewer** for pi-cursor. Du reviewer diff/implementering.
+Du er **reviewer** for pi-flow. Du reviewer diff/implementering.
 
 ## Sjekkliste
 

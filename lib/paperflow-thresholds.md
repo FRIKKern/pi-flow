@@ -1,6 +1,6 @@
 ## Subagent enforcement (paperflow-thresholds v1)
 
-Ported from [FRIKKern/paperflow](https://github.com/FRIKKern/paperflow) `lib/shared-thresholds.md`. pi-cursor orchestrators MUST follow this in CMUX and everywhere else.
+Ported from [FRIKKern/paperflow](https://github.com/FRIKKern/paperflow) `lib/shared-thresholds.md`. pi-flow orchestrators MUST follow this in CMUX and everywhere else.
 
 **Hard thresholds** — above ANY of these, dispatch a subagent:
 

@@ -2,13 +2,17 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 
-/** Settings merged by /pi-cursor-setup (global ~/.pi/agent/settings.json). */
-export const PI_CURSOR_DEFAULTS = {
+/**
+ * Defaults merged by /pi-flow-setup.
+ * Model/provider are team defaults — change via /model and /login anytime.
+ * pi-cursor-provider is an optional npm dep for Cursor-subscription models only.
+ */
+export const PI_FLOW_DEFAULTS = {
 	defaultProvider: "cursor",
 	defaultModel: "composer-2.5",
 	defaultThinkingLevel: "medium",
 	enabledModels: ["composer-2.5", "composer-2.5-fast"],
-	packages: ["pi-cursor"],
+	packages: ["pi-flow"],
 	subagents: {
 		agentOverrides: {
 			scout: { model: "composer-2.5" },
@@ -17,6 +21,7 @@ export const PI_CURSOR_DEFAULTS = {
 			reviewer: { model: "composer-2.5" },
 			oracle: { model: "composer-2.5" },
 			planner: { model: "composer-2.5" },
+			"doc-writer": { model: "composer-2.5" },
 		},
 	},
 } as const;
@@ -27,7 +32,7 @@ export interface ApplySettingsResult {
 	created: boolean;
 }
 
-export function applyPiCursorSettings(
+export function applyPiFlowSettings(
 	scope: "global" | "project" = "global",
 	cwd = process.cwd(),
 ): ApplySettingsResult {
@@ -54,10 +59,10 @@ export function applyPiCursorSettings(
 		created = true;
 	}
 
-	const merged = deepMerge(existing, PI_CURSOR_DEFAULTS as Record<string, unknown>);
+	const merged = deepMerge(existing, PI_FLOW_DEFAULTS as Record<string, unknown>);
 	merged.packages = mergePackageList(
 		existing.packages,
-		PI_CURSOR_DEFAULTS.packages,
+		PI_FLOW_DEFAULTS.packages,
 	);
 	fs.writeFileSync(settingsPath, `${JSON.stringify(merged, null, 2)}\n`, "utf8");
 

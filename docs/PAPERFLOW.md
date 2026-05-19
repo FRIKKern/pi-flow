@@ -1,51 +1,50 @@
-# Paperflow × pi-cursor
+# paperflow × pi-flow
 
-pi-cursor porter [paperflow](https://github.com/FRIKKern/paperflow) sin **orkestreringsdisiplin** til Pi. Vi fork-er ikke paperflow-repoet; vi lærer av skills, agents, HTML-kontrakt og Beads-grafen.
+**pi-flow** implements the same lifecycle as [FRIKKern/paperflow](https://github.com/FRIKKern/paperflow) inside Pi. We do not fork paperflow; we mirror its skills, agents, HTML contract, and Beads hierarchy.
 
-## Hva vi kopierer
+## Skill mapping
 
-| paperflow | pi-cursor |
-|-----------|-----------|
-| goal → plan → grill → build → review | `/skill:paperflow-*` |
-| `paperflow-doc-writer` | `pi-cursor.doc-writer` |
-| `paperflow-bd-keeper` | `pi-cursor.bd-keeper` |
-| `shared-thresholds.md` | `lib/paperflow-thresholds.md` |
-| HTML under `~/docs/paperflow/` | Samme paths når host installert |
-| autopilot med grill-pause | `skills/paperflow-autopilot` |
+| paperflow (Claude Code) | pi-flow (Pi) |
+|-------------------------|--------------|
+| `/paperflow:goal` | `/skill:goal` |
+| `/paperflow:plan` | `/skill:plan` |
+| `/paperflow:build` | `/skill:build` |
+| `/paperflow:review` | `/skill:review` |
+| `/paperflow:autopilot` | `/skill:autopilot` |
+| `/paperflow:resume` | `/skill:resume` |
+| `/paperflow:install` | paperflow `quickstart.sh` + `/pi-flow-setup` |
 
-## Hva vi ikke porter til Pi
+## Agent mapping
 
-- `paperflow-daemon`, `claude-bridge` (Claude Code-spesifikt)
-- Claude hooks (`PostToolUse` auto-open)
-- cmux dock feeds (krever paperflow host)
+| paperflow | pi-flow |
+|-----------|---------|
+| `paperflow-doc-writer` | `pi-flow.doc-writer` |
+| `paperflow-bd-keeper` | `pi-flow.bd-keeper` |
+| `paperflow-researcher` | `pi-flow.researcher` |
+| `paperflow-code-editor` | `pi-flow.worker` |
+| `paperflow-cmux-verifier` | manual / reviewer + browser MCP |
 
-Installer host separat for full opplevelse:
+## What stays in paperflow host only
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/FRIKKern/paperflow/main/scripts/quickstart.sh | bash
-```
+- `paperflow-daemon` (:8767), `claude-bridge`, grill Submit → terminal
+- cmux dock feeds, `paperflow-doc-verify`
+- Claude Code hooks (`PostToolUse` auto-open)
 
-## Grill uten bridge
+Install host for full HTML UX; pi-flow skills still work without it (chat grill, local `docs/paperflow/`).
 
-1. doc-writer skriver grill HTML
-2. Orchestrator viser sti + åpner i cmux browser
-3. Bruker svarer i Pi: `Grill answers for <plan>:` + strukturerte svar
-4. Revise-fase som normalt
+## Standards to copy
 
-## Beads hierarchy
+1. **Thresholds** — `lib/paperflow-thresholds.md` (from upstream `lib/shared-thresholds.md`)
+2. **Paths** — `lib/paperflow-paths.md`
+3. **HTML contract** — eyebrow/H1/Mermaid/`PAPERFLOW_GOAL_ID` — see paperflow `ARCHITECTURE.md`
+4. **Beads hierarchy** — Goal epic → phases → work-tasks
+5. **Grill mandatory** in plan/autopilot unless explicit skip
 
-```text
-Goal (epic, label goal-<slug>)
- ├── phase-pre-flight | phase-build | phase-review
- │    └── work-tasks (bd dep add)
- └── kind:event (goal-path rail, optional)
-```
+## Learning upstream
 
-Se paperflow `ARCHITECTURE.md` for detaljer.
+Read in order:
 
-## Læringsressurser i upstream
-
-- `skills/plan/SKILL.md` — questionnaire, draft, grill, revise
-- `skills/autopilot/SKILL.md` — momentum chain
-- `examples/example-questionnaire.html` — HTML mal
-- `lib/grill.js`, `lib/doc.js` — interaktiv grill/plan UI
+1. `README.md` — product loop
+2. `ARCHITECTURE.md` — beads, bridge, hooks
+3. `skills/plan/SKILL.md` — grill/revise
+4. `skills/autopilot/SKILL.md` — chain

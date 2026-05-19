@@ -12,6 +12,6 @@ const missing = required.filter((rel) => !existsSync(join(root, rel)));
 
 if (missing.length > 0) {
 	console.warn(
-		`pi-cursor: missing bundled deps (run npm install):\n${missing.map((m) => `  - ${m}`).join("\n")}`,
+		`pi-flow: missing bundled deps (run npm install):\n${missing.map((m) => `  - ${m}`).join("\n")}`,
 	);
 }
