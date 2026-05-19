@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
 import * as fs from "node:fs";
+import * as os from "node:os";
 import * as path from "node:path";
 import { promisify } from "node:util";
 
@@ -44,12 +45,94 @@ export function findOnPath(command: string, pathEnv = process.env.PATH): string 
 	return null;
 }
 
-export function resolveNpmCommand(): string {
-	const onPath = findOnPath("npm");
-	if (onPath) return onPath;
-	const nextToNode = path.join(path.dirname(process.execPath), "npm");
-	if (fs.existsSync(nextToNode)) return nextToNode;
-	return "npm";
+/**
+ * PATH for child processes from Pi extensions.
+ * npm/npx shell scripts use `#!/usr/bin/env node` — node dir must be on PATH.
+ */
+export function buildToolEnv(
+	base: NodeJS.ProcessEnv = process.env,
+	extraPaths: string[] = [],
+): NodeJS.ProcessEnv {
+	const nodeBin = path.dirname(process.execPath);
+	const defaults = [
+		...extraPaths,
+		nodeBin,
+		"/opt/homebrew/bin",
+		"/usr/local/bin",
+		path.join(os.homedir(), "Library", "pnpm"),
+		path.join(os.homedir(), ".local", "bin"),
+	];
+	const existing = (base.PATH ?? "").split(path.delimiter).filter(Boolean);
+	const merged = [...new Set([...defaults, ...existing])].filter(Boolean);
+	return { ...base, PATH: merged.join(path.delimiter) };
+}
+
+/** npm invocation that works when Pi has a minimal PATH (cmux, sandbox). */
+export function resolveNpmInvocation(
+	env: NodeJS.ProcessEnv = buildToolEnv(),
+): { command: string; prefixArgs: string[] } {
+	const onPath = findOnPath("npm", env.PATH);
+	if (onPath) {
+		return { command: onPath, prefixArgs: [] };
+	}
+
+	const candidates = [
+		path.join(path.dirname(process.execPath), "node_modules", "npm", "bin", "npm-cli.js"),
+		path.join(
+			path.dirname(process.execPath),
+			"..",
+			"lib",
+			"node_modules",
+			"npm",
+			"bin",
+			"npm-cli.js",
+		),
+	];
+	for (const npmCli of candidates) {
+		if (fs.existsSync(npmCli)) {
+			return { command: process.execPath, prefixArgs: [npmCli] };
+		}
+	}
+
+	return { command: "npm", prefixArgs: [] };
+}
+
+export function resolveNpxInvocation(
+	env: NodeJS.ProcessEnv = buildToolEnv(),
+): { command: string; prefixArgs: string[] } {
+	const onPath = findOnPath("npx", env.PATH);
+	if (onPath) {
+		return { command: onPath, prefixArgs: [] };
+	}
+
+	const candidates = [
+		path.join(path.dirname(process.execPath), "node_modules", "npm", "bin", "npx-cli.js"),
+		path.join(
+			path.dirname(process.execPath),
+			"..",
+			"lib",
+			"node_modules",
+			"npm",
+			"bin",
+			"npx-cli.js",
+		),
+	];
+	for (const npxCli of candidates) {
+		if (fs.existsSync(npxCli)) {
+			return { command: process.execPath, prefixArgs: [npxCli] };
+		}
+	}
+
+	return { command: "npx", prefixArgs: [] };
+}
+
+export async function runNpm(
+	args: string[],
+	options: { timeout?: number; cwd?: string; env?: NodeJS.ProcessEnv } = {},
+): Promise<{ ok: true; stdout: string; stderr: string } | { ok: false; error: string }> {
+	const env = options.env ?? buildToolEnv();
+	const { command, prefixArgs } = resolveNpmInvocation(env);
+	return runCommand(command, [...prefixArgs, ...args], { ...options, env });
 }
 
 export async function runCommand(
@@ -59,10 +142,10 @@ export async function runCommand(
 ): Promise<{ ok: true; stdout: string; stderr: string } | { ok: false; error: string }> {
 	try {
 		const { stdout, stderr } = await execFileAsync(command, args, {
-			env: options.env ?? process.env,
+			env: options.env ?? buildToolEnv(),
 			timeout: options.timeout ?? 30_000,
 			cwd: options.cwd,
-			maxBuffer: 2 * 1024 * 1024,
+			maxBuffer: 4 * 1024 * 1024,
 		});
 		return { ok: true, stdout: stdout.trim(), stderr: stderr.trim() };
 	} catch (error) {

@@ -19,6 +19,11 @@ import {
 	cmuxDetectJson,
 	isInCmux,
 } from "../shared/paperflow-client.ts";
+import {
+	ensureBrowseCli,
+	loadBrowserbaseEnvFile,
+	runBrowseCli,
+} from "../shared/browserbase.ts";
 import { resolvePackageRoot } from "../shared/package-root.ts";
 import { loadMergedPiSettings } from "../shared/settings-loader.ts";
 import {
@@ -344,6 +349,50 @@ export default function piFlowHost(pi: ExtensionAPI): void {
 				content: [{ type: "text", text: r.ok ? r.stdout : r.error }],
 				details: {},
 				isError: !r.ok,
+			};
+		},
+	});
+
+	pi.registerTool({
+		name: "paperflow_browse",
+		label: "Browserbase CLI (browse)",
+		description:
+			"Install or run the browse CLI from Pi. action=install|version|cloud_projects|sessions_list.",
+		parameters: Type.Object({
+			action: Type.Union([
+				Type.Literal("install"),
+				Type.Literal("version"),
+				Type.Literal("cloud_projects"),
+				Type.Literal("sessions_list"),
+			]),
+		}),
+		async execute(_id, params) {
+			loadBrowserbaseEnvFile();
+			if (params.action === "install") {
+				const result = await ensureBrowseCli();
+				const text = JSON.stringify(result, null, 2);
+				return {
+					content: [{ type: "text", text }],
+					details: result,
+					isError: !result.ok,
+				};
+			}
+			const args =
+				params.action === "version"
+					? ["--version"]
+					: params.action === "cloud_projects"
+						? ["cloud", "projects", "list"]
+						: ["cloud", "sessions", "list"];
+			const run = await runBrowseCli(args, 60_000);
+			return {
+				content: [
+					{
+						type: "text",
+						text: run.ok ? run.stdout : `FAIL: ${run.error} (tried ${run.source})`,
+					},
+				],
+				details: { source: run.source },
+				isError: !run.ok,
 			};
 		},
 	});

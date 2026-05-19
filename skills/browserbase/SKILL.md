@@ -24,6 +24,14 @@ See `lib/browser-routing.md`.
 
 ## Setup (once per machine)
 
+From Pi (preferred — works in cmux minimal PATH):
+
+```text
+paperflow_browse({ action: "install" })
+```
+
+Or:
+
 ```text
 /pi-flow-browserbase-setup
 ```

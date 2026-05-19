@@ -4,10 +4,11 @@ import * as path from "node:path";
 import { applyBrowserbaseMcp } from "./mcp-browserbase.ts";
 import { resolvePackageRoot } from "./package-root.ts";
 import {
-	commandExists,
+	buildToolEnv,
 	findOnPath,
-	resolveNpmCommand,
 	runCommand,
+	runNpm,
+	resolveNpxInvocation,
 } from "./exec.ts";
 import type { DoctorCheck } from "./doctor.ts";
 
@@ -34,12 +35,39 @@ export interface BrowserbaseSetupResult {
 /** Prepend ~/.pi/agent/bin so Pi sessions always find user-local CLIs. */
 export function envWithPiAgentBin(base: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
 	fs.mkdirSync(PI_AGENT_BIN, { recursive: true });
-	const pathKey = base.PATH ?? "";
-	const parts = pathKey.split(path.delimiter).filter(Boolean);
-	if (!parts.includes(PI_AGENT_BIN)) {
-		return { ...base, PATH: [PI_AGENT_BIN, ...parts].join(path.delimiter) };
+	return buildToolEnv(base, [PI_AGENT_BIN]);
+}
+
+/** Symlink browse into ~/.pi/agent/bin after npm --prefix install. */
+export function linkBrowseIntoAgentBin(): string | null {
+	fs.mkdirSync(PI_AGENT_BIN, { recursive: true });
+	const dest = path.join(PI_AGENT_BIN, "browse");
+	const candidates = [
+		path.join(PI_AGENT_DIR, "bin", "browse"),
+		path.join(PI_AGENT_DIR, "node_modules", ".bin", "browse"),
+	];
+	for (const src of candidates) {
+		if (!fs.existsSync(src)) continue;
+		try {
+			if (fs.existsSync(dest)) fs.unlinkSync(dest);
+		} catch {
+			// ignore
+		}
+		try {
+			fs.symlinkSync(src, dest);
+			return dest;
+		} catch {
+			// copy fallback
+			try {
+				fs.copyFileSync(src, dest);
+				fs.chmodSync(dest, 0o755);
+				return dest;
+			} catch {
+				// continue
+			}
+		}
 	}
-	return { ...base };
+	return null;
 }
 
 export function loadBrowserbaseEnvFile(): void {
@@ -103,6 +131,11 @@ export function resolveBrowseCommand(
 		return { cmd: agentBrowse, argsPrefix: [], env, source: agentBrowse };
 	}
 
+	const modulesBin = path.join(PI_AGENT_DIR, "node_modules", ".bin", "browse");
+	if (fs.existsSync(modulesBin)) {
+		return { cmd: modulesBin, argsPrefix: [], env, source: modulesBin };
+	}
+
 	const onPath = findOnPath("browse", env.PATH);
 	if (onPath) {
 		return { cmd: onPath, argsPrefix: [], env, source: onPath };
@@ -118,16 +151,16 @@ export function resolveBrowseCommand(
 		}
 	}
 
-	const npx = findOnPath("npx", env.PATH) ?? "npx";
+	const npx = resolveNpxInvocation(env);
 	return {
-		cmd: npx,
-		argsPrefix: ["--yes", BROWSE_PACKAGE],
+		cmd: npx.command,
+		argsPrefix: [...npx.prefixArgs, "--yes", BROWSE_PACKAGE],
 		env,
 		source: "npx --yes browse",
 	};
 }
 
-async function runBrowse(
+export async function runBrowseCli(
 	args: string[],
 	timeout = 30_000,
 ): Promise<{ ok: true; stdout: string } | { ok: false; error: string; source: string }> {
@@ -150,7 +183,7 @@ export async function ensureBrowseCli(): Promise<{
 	const env = envWithPiAgentBin();
 	process.env.PATH = env.PATH;
 
-	const existing = await runBrowse(["--version"], 15_000);
+	const existing = await runBrowseCli(["--version"], 15_000);
 	if (existing.ok) {
 		return {
 			ok: true,
@@ -159,33 +192,31 @@ export async function ensureBrowseCli(): Promise<{
 		};
 	}
 
-	const npm = resolveNpmCommand();
 	fs.mkdirSync(PI_AGENT_DIR, { recursive: true });
 
-	// Prefer user-writable prefix (works when global npm needs sudo or Pi PATH is minimal)
-	const localInstall = await runCommand(
-		npm,
+	// Prefer user-writable prefix (Pi often has no node on PATH for npm scripts)
+	const localInstall = await runNpm(
 		["install", BROWSE_PACKAGE, "--prefix", PI_AGENT_DIR, "--no-fund", "--no-audit"],
 		{ timeout: 180_000, env },
 	);
 	if (localInstall.ok) {
-		const afterLocal = await runBrowse(["--version"], 15_000);
+		const linked = linkBrowseIntoAgentBin();
+		const afterLocal = await runBrowseCli(["--version"], 15_000);
 		if (afterLocal.ok) {
 			return {
 				ok: true,
-				detail: `${afterLocal.stdout.split("\n")[0] ?? "installed"} (${PI_AGENT_BIN})`,
-				source: path.join(PI_AGENT_BIN, "browse"),
+				detail: `${afterLocal.stdout.split("\n")[0] ?? "installed"} (${linked ?? PI_AGENT_BIN})`,
+				source: linked ?? resolveBrowseCommand().source,
 			};
 		}
 	}
 
-	const globalInstall = await runCommand(
-		npm,
+	const globalInstall = await runNpm(
 		["install", "-g", BROWSE_PACKAGE, "--no-fund", "--no-audit"],
 		{ timeout: 180_000, env },
 	);
 	if (globalInstall.ok) {
-		const afterGlobal = await runBrowse(["--version"], 15_000);
+		const afterGlobal = await runBrowseCli(["--version"], 15_000);
 		if (afterGlobal.ok) {
 			return {
 				ok: true,
@@ -196,7 +227,7 @@ export async function ensureBrowseCli(): Promise<{
 	}
 
 	// npx always works if npm registry is reachable
-	const viaNpx = await runBrowse(["--version"], 60_000);
+	const viaNpx = await runBrowseCli(["--version"], 60_000);
 	if (viaNpx.ok) {
 		return {
 			ok: true,
@@ -251,7 +282,7 @@ export async function checkBrowserbaseCloud(): Promise<DoctorCheck> {
 			detail: `BROWSERBASE_API_KEY unset — edit ${BROWSERBASE_ENV_FILE}`,
 		};
 	}
-	const list = await runBrowse(["cloud", "projects", "list"], 30_000);
+	const list = await runBrowseCli(["cloud", "projects", "list"], 30_000);
 	return {
 		name: "browserbase API",
 		status: list.ok ? "pass" : "fail",
