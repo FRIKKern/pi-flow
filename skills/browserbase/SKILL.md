@@ -88,6 +88,18 @@ browse doctor
 
 After a successful MCP session, `browse cloud sessions list` should show a new session.
 
+## Giga research template (researcher)
+
+```text
+Goal pi-flow-l9o — Browserbase research subtask:
+1. browse doctor; browse open --remote https://docs.browserbase.com/integrations/mcp/introduction
+2. browse snapshot / eval for headings; browse cloud sessions list; browse stop
+3. In Pi: mcp browserbase start → navigate → observe → extract → end
+4. Artifact: ~/docs/paperflow/specs/2026-05-19-pi-flow-browserbase-research.html
+5. Never Browserbase on localhost:8767 paperflow HTML
+Doc index: https://docs.browserbase.com/llms.txt
+```
+
 ## Delegation
 
 | Need | Dispatch |

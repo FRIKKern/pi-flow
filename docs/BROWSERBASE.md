@@ -56,7 +56,7 @@ Merged from `settings/mcp.browserbase.json` into `~/.pi/agent/mcp.json`:
 }
 ```
 
-Easiest path — Browserbase hosts the server. See [Browserbase MCP docs](https://docs.browserbase.com/guides/mcp).
+Easiest path — Browserbase hosts the server. See [MCP introduction](https://docs.browserbase.com/integrations/mcp/introduction) and [MCP setup](https://docs.browserbase.com/integrations/mcp/setup). Agent discovery: [llms.txt](https://docs.browserbase.com/llms.txt).
 
 ### Self-hosted stdio
 
@@ -100,6 +100,19 @@ mcp({ search: "navigate" })
 | List sessions | `browse cloud sessions list` |
 | Environment check | `browse doctor` |
 | Scaffold template | `browse templates clone getting-started-with-browserbase --language typescript` |
+
+## Researcher smoke (browse remote)
+
+```bash
+export PATH="$HOME/.pi/agent/bin:$PATH"
+browse doctor
+browse open "https://docs.browserbase.com/integrations/mcp/introduction" --remote
+browse snapshot
+browse cloud sessions list
+browse stop
+```
+
+In Pi, delegate to <code>researcher</code> with <code>/skill:browserbase</code> for MCP (start → navigate → observe → extract → end).
 
 ## Verify integration
 
