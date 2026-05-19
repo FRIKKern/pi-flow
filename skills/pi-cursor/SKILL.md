@@ -7,7 +7,15 @@ description: >-
 
 # pi-cursor workflow
 
-Standard løkke i **Pi** (ikke Cursor IDE):
+**CMUX + paperflow** (foretrukket):
+
+```
+/skill:paperflow-goal → plan → grill (pause) → build → review
+```
+
+Se `/skill:paperflow-autopilot` for hele kjeden.
+
+**Generell agent-løkke** (uten Beads):
 
 ```
 scout → (researcher) → planner → worker → reviewer

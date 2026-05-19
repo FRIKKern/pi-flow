@@ -1,7 +1,7 @@
 {
   "name": "pi-cursor",
-  "version": "0.1.0",
-  "description": "Pi harness: Composer 2.5 via Cursor subscription, MCP on subagents, opinionated scout/research/workflow agents",
+  "version": "0.2.0",
+  "description": "Pi harness for CMUX: Composer 2.5, MCP subagents, paperflow goal/plan/grill/build/review workflow",
   "type": "module",
   "license": "MIT",
   "keywords": [
@@ -11,7 +11,9 @@
     "cursor",
     "composer",
     "mcp",
-    "subagents"
+    "subagents",
+    "paperflow",
+    "cmux"
   ],
   "repository": {
     "type": "git",
@@ -24,6 +26,8 @@
     "prompts/",
     "settings/",
     "skills/",
+    "docs/",
+    "lib/",
     "AGENTS.md",
     "README.md",
     "LICENSE",
@@ -46,6 +50,9 @@
     "skills": [
       "./skills",
       "node_modules/pi-subagents/skills"
+    ],
+    "prompts": [
+      "./prompts"
     ],
     "prompts": [
       "./prompts",

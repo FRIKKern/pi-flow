@@ -68,18 +68,24 @@ export default function piCursorCore(pi: ExtensionAPI): void {
 				"pi-mcp-adapter (MCP proxy + direct tools)",
 				"pi-subagents (child agents with mcp: in frontmatter)",
 			];
+			const paperflowHost =
+				process.env.HOME &&
+				`${process.env.HOME}/.local/bin/paperflow-doctor`;
 			ctx.ui.notify(
 				[
 					"pi-cursor doctor",
 					"",
-					"Bundled extensions (install once: pi install npm:pi-cursor):",
+					"Bundled:",
 					...checks.map((c) => `  • ${c}`),
 					"",
-					`Agents dir: ${agentsTarget}`,
-					`Synced prefix: ${NAMESPACE}.*`,
+					"Paperflow (CMUX):",
+					"  • Skills: /skill:paperflow-{goal,plan,build,review,autopilot,resume}",
+					"  • Upstream: github.com/FRIKKern/paperflow",
+					"  • Full HTML+grill bridge: install paperflow host (quickstart.sh)",
+					`  • Doctor: ${paperflowHost ?? "~/.local/bin/paperflow-doctor"} --fast`,
 					"",
-					"If subagent lacks MCP: add mcp:server to that agent's tools: frontmatter.",
-					"Run /mcp setup after first install.",
+					`Agents: ${agentsTarget} (${NAMESPACE}.*)`,
+					"Thresholds: lib/paperflow-thresholds.md",
 				].join("\n"),
 				"info",
 			);

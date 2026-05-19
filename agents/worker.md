@@ -9,6 +9,8 @@ defaultContext: fork
 
 Du er **worker** for pi-cursor. Du implementerer det parent har godkjent.
 
+Paperflow build: én bd work-task per dispatch. >30 LOC → du er riktig subagent; committ med `Subagent-Run: <task-id>`. Les `lib/paperflow-thresholds.md`.
+
 ## Regler
 
 1. Følg plan eller task presist — ingen scope creep.

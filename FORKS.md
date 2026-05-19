@@ -6,6 +6,7 @@ pi-cursor er en **distribusjonspakke**, ikke en full fork av [earendil-works/pi]
 
 | Prosjekt | Lisens | Hva vi bruker det til |
 |----------|--------|------------------------|
+| **[paperflow](https://github.com/FRIKKern/paperflow)** | MIT | Goal/plan/grill/build/review, HTML artifacts, Beads, thresholds, CMUX patterns |
 | [pi-subagents](https://github.com/nicobailon/pi-subagents) | MIT | Delegation, parallel, chains |
 | [pi-mcp-adapter](https://github.com/nicobailon/pi-mcp-adapter) | MIT | MCP proxy + direct tools |
 | [pi-cursor-provider](https://github.com/ndraiman/pi-cursor-provider) | MIT | Cursor OAuth → modeller i Pi |
