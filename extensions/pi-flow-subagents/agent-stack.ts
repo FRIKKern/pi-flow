@@ -20,6 +20,9 @@ export function buildAgentStack(roster: SubagentRosterState): AgentStackItem[] {
 		});
 	}
 	for (const run of roster.runs) {
+		// Skip completed ghosts and placeholders with no session — they aren't followable.
+		if (run.status !== "running" && run.status !== "detached") continue;
+		if (!run.sessionFile) continue;
 		stack.push({
 			id: run.id,
 			label: run.agent,

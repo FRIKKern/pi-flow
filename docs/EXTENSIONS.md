@@ -6,8 +6,10 @@
 pi-flow-setup     settings, agents, subagent config, /pi-flow-setup, live doctor
 pi-flow-host      tools, session register, cmux skills, goal injection
 pi-flow-subagents boss/follow roster, /pf-* commands, cmux mirror
+pi-flow-memory     session journal, named agents, /pf-recall · /pf-chronicler
+pi-flow-sessions   auto title from first prompt · /pf-rename
 pi-flow-statusline goal/phase/task footer
-extensions/shared paperflow-client, host-manager, beads, subagent-roster
+extensions/shared paperflow-client, host-manager, beads, subagent-roster, session-memory
 ```
 
 Bundled: `pi-subagents`, `pi-mcp-adapter`, optional `pi-cursor-provider`.
@@ -27,11 +29,12 @@ Bundled: `pi-subagents`, `pi-mcp-adapter`, optional `pi-cursor-provider`.
 
 | Event | Extension |
 |-------|-----------|
-| `session_start` | setup: agents · host: register · subagents: roster |
-| `tool_execution_*` | subagents: track runs, watch nudges |
+| `session_start` | setup: agents · host: register · subagents: roster · memory: journal |
+| `message_end` | sessions: auto-name · memory: journal |
+| `turn_end` · `tool_execution_*` | memory: journal · subagents: roster |
 | `subagent:async-*` | subagents: roster updates |
 | `resources_discover` | host: `skills-cmux/` when cmux |
-| `before_agent_start` | host: active goal snippet |
+| `before_agent_start` | host: goal · memory: recall block |
 | `appendEntry` | host: `pi-flow-workflow` restore |
 
 ## Not in extensions

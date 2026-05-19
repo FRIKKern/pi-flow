@@ -64,18 +64,71 @@ export function markRunStatus(
 	if (sessionFile) run.sessionFile = sessionFile;
 }
 
+/** Running entries that have a persisted session (followable). */
+export function listFollowableRunning(state: SubagentRosterState): SubagentRunEntry[] {
+	return state.runs.filter((r) => r.status === "running" && Boolean(r.sessionFile));
+}
+
+/** Running placeholders from tool_execution_start before a session exists. */
+export function listPendingRunning(state: SubagentRosterState): SubagentRunEntry[] {
+	return state.runs.filter((r) => r.status === "running" && !r.sessionFile);
+}
+
 export function listRunning(state: SubagentRosterState): SubagentRunEntry[] {
 	return state.runs.filter((r) => r.status === "running");
+}
+
+/** Max age for a running entry with no session before we treat it as stale. */
+const PENDING_STALE_MS = 2 * 60 * 1000;
+/** Max age for any running entry before we auto-complete it. */
+const RUNNING_STALE_MS = 30 * 60 * 1000;
+
+/**
+ * Drop ghost "running" rows and cap history so the footer/widget stay honest.
+ * Call on load and before rendering status/widget.
+ */
+export function reconcileRoster(state: SubagentRosterState, now = Date.now()): void {
+	for (const run of state.runs) {
+		if (run.status !== "running") continue;
+		const age = now - (run.updatedAt || run.startedAt || now);
+		if (!run.sessionFile && age > PENDING_STALE_MS) {
+			run.status = "completed";
+			run.updatedAt = now;
+			continue;
+		}
+		if (age > RUNNING_STALE_MS) {
+			run.status = "completed";
+			run.updatedAt = now;
+		}
+	}
+	// Keep completed/failed entries for stack history, but trim deep backlog.
+	state.runs = state.runs.slice(0, 32);
+}
+
+/** Mark every placeholder row for a tool call when the tool returns without details. */
+export function finalizeToolCallRuns(
+	state: SubagentRosterState,
+	toolCallId: string,
+	status: SubagentRunStatus = "completed",
+): void {
+	const now = Date.now();
+	for (const run of state.runs) {
+		if (run.toolCallId !== toolCallId) continue;
+		if (run.status !== "running") continue;
+		run.status = status;
+		run.updatedAt = now;
+	}
 }
 
 export function pickFollowTarget(
 	state: SubagentRosterState,
 	query?: string,
 ): SubagentRunEntry | undefined {
+	reconcileRoster(state);
 	const q = query?.trim();
 	if (!q) {
-		const running = listRunning(state);
-		if (running[0]) return running[0];
+		const followable = listFollowableRunning(state);
+		if (followable[0]) return followable[0];
 		return state.runs.find((r) => r.sessionFile);
 	}
 	const byId = state.runs.find((r) => r.id.startsWith(q) || r.runId?.startsWith(q));
@@ -90,17 +143,45 @@ export function pickFollowTarget(
 }
 
 export function formatRosterLine(state: SubagentRosterState): string | undefined {
-	const running = listRunning(state);
+	reconcileRoster(state);
+	const followable = listFollowableRunning(state);
+	const pending = listPendingRunning(state);
 	if (state.viewing === "follow" && state.followRunId) {
 		const run = state.runs.find((r) => r.id === state.followRunId);
 		if (run) {
-			return `follow:${run.agent}${running.length > 1 ? ` (+${running.length - 1})` : ""}`;
+			const others = followable.filter((r) => r.id !== run.id).length + pending.length;
+			return `follow:${run.agent}${others > 0 ? ` (+${others})` : ""}`;
 		}
 	}
-	if (running.length === 0) return undefined;
-	const names = running.slice(0, 3).map((r) => r.agent);
-	const extra = running.length > 3 ? ` +${running.length - 3}` : "";
-	return `sub:${names.join(",")}${extra}`;
+	if (followable.length === 0 && pending.length === 0) return undefined;
+	const parts: string[] = [];
+	if (followable.length > 0) {
+		const byAgent = new Map<string, number>();
+		for (const r of followable) {
+			byAgent.set(r.agent, (byAgent.get(r.agent) ?? 0) + 1);
+		}
+		const labels = [...byAgent.entries()]
+			.slice(0, 3)
+			.map(([agent, n]) => (n > 1 ? `${n}×${agent}` : agent));
+		const extraAgents = byAgent.size > 3 ? ` +${byAgent.size - 3} agents` : "";
+		parts.push(`sub:${labels.join(",")}${extraAgents}`);
+	}
+	if (pending.length > 0) {
+		parts.push(`pending:${pending.length}`);
+	}
+	return parts.join(" ");
+}
+
+/** Widget/status summaries — only show followable runs as individual lines. */
+export function summarizeRunningForWidget(state: SubagentRosterState): {
+	followable: SubagentRunEntry[];
+	pendingCount: number;
+} {
+	reconcileRoster(state);
+	return {
+		followable: listFollowableRunning(state),
+		pendingCount: listPendingRunning(state).length,
+	};
 }
 
 interface SubagentToolDetails {

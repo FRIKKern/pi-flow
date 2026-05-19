@@ -16,12 +16,28 @@
 |----------|----------|-----|-----------------|
 | `scout` | Repo map, find symbols | Read tools | No |
 | `researcher` | External docs, APIs, web (Browserbase MCP) | `read, bash, mcp:browserbase` + `browserbase` skill | No |
-
-**Researcher must have Browserbase tools** — pi-flow `settings/defaults.json` sets `subagents.agentOverrides.researcher.tools` to `read, bash, mcp:browserbase`. Without this, the builtin only gets `web_search` and Browserbase agentstorms appear to "not work". Restart Pi after settings change.
+| `chronicler` | Compress `.pi-flow/memory/` journals → SUMMARY + agent MEMORY | `read, write, bash` (memory dir only) | Yes (`.pi-flow/memory/` only) |
 | `planner` | Implementation plan from approved spec | Optional | No (plan text only) |
 | `worker` | Single work-task implementation | Optional | Yes (scoped) |
 | `reviewer` | Evidence review, ship gate | Read | No |
 | `oracle` | Plan/grill critique before build | Optional | No |
+
+**Researcher must have Browserbase tools** — pi-flow `settings/defaults.json` sets `subagents.agentOverrides.researcher.tools` to `read, bash, mcp:browserbase`. Without this, the builtin only gets `web_search` and Browserbase agentstorms appear to "not work". Restart Pi after settings change.
+
+## Agentstorm
+
+**Agentstorm** = many parallel subagents at once. Defaults in `piFlow.agentstorm`:
+
+| Setting | Default |
+|---------|---------|
+| `defaultCount` | 20 |
+| `defaultAgent` | `researcher` |
+| `defaultConcurrency` | 4 |
+| `maxCount` | 128 |
+
+Invoke: `/pf-storm [count] [agent] <task>` or `/skill:agentstorm`. Pass `count` = storm size and `concurrency` = `defaultConcurrency` (4) so browse/MCP work queues instead of 8×3 parallel waves.
+
+Subagent `config.json` should set `control.needsAttentionAfterMs`: **180000** (3 min) — merged by `/pi-flow-setup` — to avoid idle alerts during long browser sessions.
 
 ## pi-flow-only agents
 

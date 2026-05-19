@@ -31,13 +31,20 @@ pi-flow's goal is to be the **best subagent tool**: the **boss** session orchest
 | `/pf-watch` | Nudge on each subagent start ("/pf-follow to watch") |
 | `/pf-stack` | Interactive stack picker (↑↓ Enter) — also enables ↓↑ cycling |
 | `/pf-mirror [agent] [0-3]` | Open same session in a **cmux worker** pane (`pif` layout) |
+| `/pf-storm [N] [agent] task` | **Agentstorm** — parallel burst (default **20** agents) |
+| `/pf-memory` | Session memory status (`.pi-flow/memory/`) |
+| `/pf-name <slug> [agent]` | Name/bind agent — dedicated `MEMORY.md` |
+| `/pf-recall [slug]` | Print recall (auto-injected on boss turns) |
+| `/pf-note [slug] text` | Manual journal note |
+| `/pf-chronicler [focus]` | Compress journal → `SUMMARY.md` |
+| `/pf-rename <title>` | Rename **this Pi session** (auto-titled from first prompt) |
 
 ### Keyboard (empty prompt)
 
 | Input | Action |
 |-------|--------|
 | **↓** / **↑** | Cycle boss ↔ subagent sessions (after `/pf-stack` once) |
-| **Ctrl+Alt+]** / **[** | Next / previous in stack |
+| **Ctrl+Shift+]** / **[** | Next / previous in stack |
 
 While following a subagent, the status line shows `follow:researcher` (extension `pi-flow-subagents`). The widget lists active runs.
 

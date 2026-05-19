@@ -2,6 +2,8 @@
 
 **Simple stack:** 6 lifecycle skills · **3 pi-flow agents** · pi-subagents builtins · external paperflow host.
 
+**Activity + auto-rescue:** `pi-flow-progress` tracks usage signals (stream deltas, ctx tokens, tool updates, HTTP). Spinner shows `LIVE` vs `DEAD?`. Rescue runs only when there are **no** meaningful signals for ~90s — then abort, optional compact, auto-resume. `/pf-activity` · `/pf-rescue`. Tune `piFlow.progress`.
+
 ## Lifecycle
 
 ```text

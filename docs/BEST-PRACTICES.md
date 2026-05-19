@@ -26,6 +26,7 @@ We deliberately **do not** ship 10+ custom agents like OMC or 15 meta-skills lik
 | Lazy skills | `lib/lazy-skills.md` · router skill |
 | Unified status dashboard | `/pi-flow-status` |
 | Session handoff | `/pi-flow-handoff` |
+| Durable session memory | `.pi-flow/memory/` · `/pf-chronicler` · `/skill:memory` |
 | Subagent isolation + MCP matrix | `lib/subagents-policy.md` · `subagents.isolation` |
 | Boss/follow/mirror UX | `docs/SUBAGENTS-UX.md` · `/pf-*` commands |
 | Beads ↔ session sync | `paperflow_beads` `sync_todo` |

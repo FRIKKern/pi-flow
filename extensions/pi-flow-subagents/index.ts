@@ -13,11 +13,14 @@ import {
 } from "../shared/session-actions.ts";
 import {
 	createRosterState,
+	finalizeToolCallRuns,
 	formatRosterLine,
 	ingestSubagentToolResult,
 	loadRoster,
 	pickFollowTarget,
+	reconcileRoster,
 	saveRoster,
+	summarizeRunningForWidget,
 	type SubagentRosterState,
 	upsertRun,
 } from "../shared/subagent-roster.ts";
@@ -30,6 +33,12 @@ import {
 	nextStackIndex,
 	type AgentStackItem,
 } from "./agent-stack.ts";
+import {
+	agentstormBossInstruction,
+	buildAgentstormPayload,
+	getAgentstormConfig,
+	parseAgentstormArgs,
+} from "../shared/agentstorm.ts";
 
 const STATUS_KEY = "pi-flow-sub";
 const WIDGET_KEY = "pi-flow-subagents";
@@ -97,7 +106,12 @@ export default function piFlowSubagents(pi: ExtensionAPI): void {
 
 	function refreshWidget(ctx: ExtensionContext): void {
 		if (!ctx.hasUI) return;
-		const running = roster.runs.filter((r) => r.status === "running");
+		reconcileRoster(roster);
+		const { followable, pendingCount } = summarizeRunningForWidget(roster);
+		if (followable.length === 0 && pendingCount === 0 && !roster.autoFollow) {
+			ctx.ui.setWidget(WIDGET_KEY, undefined);
+			return;
+		}
 		const lines: string[] = [];
 		const mode =
 			roster.viewing === "follow"
@@ -105,12 +119,17 @@ export default function piFlowSubagents(pi: ExtensionAPI): void {
 				: "Boss (orchestrator)";
 		lines.push(`${mode} · ↓↑ stack · /pf-stack · /pf-boss`);
 		if (roster.autoFollow) lines.push("watch ON");
-		if (running.length === 0) {
+		if (followable.length === 0 && pendingCount === 0) {
 			lines.push("no active subagents");
 		} else {
-			for (const r of running.slice(0, 4)) {
+			for (const r of followable.slice(0, 4)) {
 				lines.push(`▸ ${r.agent}${r.taskPreview ? ` — ${r.taskPreview.slice(0, 40)}` : ""}`);
 			}
+			if (pendingCount > 0) {
+				lines.push(`⏳ ${pendingCount} starting (no session yet — not in stack)`);
+			}
+			const extra = followable.length > 4 ? followable.length - 4 : 0;
+			if (extra > 0) lines.push(`… +${extra} more with sessions`);
 		}
 		ctx.ui.setWidget(WIDGET_KEY, lines);
 	}
@@ -280,15 +299,10 @@ export default function piFlowSubagents(pi: ExtensionAPI): void {
 		const boss = bossSessionFile(ctx);
 		roster = loadRoster(ctx.cwd, boss);
 		if (boss) roster.bossSessionFile = boss;
+		reconcileRoster(roster);
 		stackHintShown = false;
 		bindBoss(ctx);
 		attachTerminalInput(ctx);
-		if (ctx.hasUI && !stackHintShown) {
-			ctx.ui.setStatus(
-				"pi-flow-stack",
-				"↓↑ cycle agents (empty prompt) · /pf-stack",
-			);
-		}
 	});
 
 	pi.on("session_shutdown", () => {
@@ -340,6 +354,11 @@ export default function piFlowSubagents(pi: ExtensionAPI): void {
 	pi.on("tool_execution_end", (event, ctx) => {
 		if (event.toolName !== "subagent") return;
 		const entries = ingestSubagentToolResult(roster, event.toolCallId, event.result);
+		if (entries.length === 0) {
+			const failed = (event.result as { isError?: boolean })?.isError === true;
+			finalizeToolCallRuns(roster, event.toolCallId, failed ? "failed" : "completed");
+		}
+		reconcileRoster(roster);
 		saveRoster(ctx.cwd, roster);
 		refreshStatus(ctx);
 		refreshWidget(ctx);
@@ -462,6 +481,38 @@ export default function piFlowSubagents(pi: ExtensionAPI): void {
 			saveRoster(ctx.cwd, roster);
 			ctx.ui.notify(`watch: ${roster.autoFollow ? "ON" : "OFF"}`, "info");
 			refreshWidget(ctx);
+		},
+	});
+
+	pi.registerCommand("pf-storm", {
+		description: "Agentstorm — parallel subagents (default 20; pass count to override)",
+		handler: async (args, ctx) => {
+			bindCommand(ctx);
+			const config = getAgentstormConfig();
+			const parsed = parseAgentstormArgs(args, config);
+			if (!parsed.task) {
+				ctx.ui.notify(
+					`Usage: /pf-storm [count] [agent] <task> — default ${config.defaultCount}× ${config.defaultAgent}`,
+					"warning",
+				);
+				return;
+			}
+			const payload = buildAgentstormPayload(parsed, config);
+			roster.autoFollow = true;
+			saveRoster(ctx.cwd, roster);
+			refreshWidget(ctx);
+			pi.sendMessage(
+				{
+					customType: "pi-flow-agentstorm",
+					content: agentstormBossInstruction(parsed, payload),
+					display: true,
+				},
+				{ deliverAs: "followUp" },
+			);
+			ctx.ui.notify(
+				`Agentstorm: ${parsed.count}× ${parsed.agent} — dispatching via subagent()`,
+				"info",
+			);
 		},
 	});
 

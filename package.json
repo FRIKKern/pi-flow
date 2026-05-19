@@ -50,7 +50,10 @@
       "./extensions/pi-flow-setup/index.ts",
       "./extensions/pi-flow-host/index.ts",
       "./extensions/pi-flow-statusline/index.ts",
+      "./extensions/pi-flow-progress/index.ts",
       "./extensions/pi-flow-subagents/index.ts",
+      "./extensions/pi-flow-memory/index.ts",
+      "./extensions/pi-flow-sessions/index.ts",
       "node_modules/pi-cursor-provider/index.ts",
       "node_modules/pi-mcp-adapter/index.ts",
       "node_modules/pi-subagents/src/extension/index.ts"

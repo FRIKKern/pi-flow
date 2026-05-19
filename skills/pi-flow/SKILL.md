@@ -22,6 +22,9 @@ Read `lib/orchestrator.md` for dispatch rules. **Lazy load:** read each skill's 
 | Long session / context full | `/pi-flow-handoff [focus]` |
 | Update pi-flow | `/pi-flow-update` |
 | Browserbase / cloud browser | `/pi-flow-browserbase-setup` · `/skill:browserbase` |
+| Many parallel subagents (agentstorm) | `/pf-storm …` · `/skill:agentstorm` (default 20) |
+| Session memory / named agents | `/pf-memory` · `/pf-name` · `/pf-chronicler` · `/skill:memory` |
+| Session title / resume | `/pf-rename` · `/name` · `/skill:session` (auto-name on first prompt) |
 | paperflow HTML in cmux | `/skill:cmux-browser` |
 
 ## Lifecycle

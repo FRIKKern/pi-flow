@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Launch Pi with the pi-flow package loaded (dev or global install).
+# Defaults to --continue so restarts (including after a crash) resume the last session.
 set -euo pipefail
 
 if ! command -v pi >/dev/null 2>&1; then
@@ -10,8 +11,30 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PKG_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-if pi list 2>/dev/null | grep -q 'pi-flow'; then
-  exec pi "$@"
+# Respect explicit session intent; --new means a fresh session (no --continue).
+pi_flow_wants_continue() {
+  for arg in "$@"; do
+    case "$arg" in
+      -c|--continue|-r|--resume|--no-session|--session|--fork|--session-dir|--new)
+        return 1
+        ;;
+    esac
+  done
+  if [ "${PI_FLOW_NO_CONTINUE:-}" = "1" ]; then
+    return 1
+  fi
+  return 0
+}
+
+PI_ARGS=("$@")
+if pi_flow_wants_continue "${PI_ARGS[@]}"; then
+  PI_ARGS=(-c "${PI_ARGS[@]}")
 fi
 
-exec pi -e "${PKG_ROOT}" "$@"
+export PI_FLOW_PI_BIN=pi
+
+if pi list 2>/dev/null | grep -q 'pi-flow'; then
+  exec pi "${PI_ARGS[@]}"
+fi
+
+exec pi -e "${PKG_ROOT}" "${PI_ARGS[@]}"

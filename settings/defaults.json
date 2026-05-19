@@ -2,8 +2,13 @@
   "defaultProvider": "cursor",
   "defaultModel": "composer-2.5",
   "defaultThinkingLevel": "medium",
-  "enabledModels": ["composer-2.5", "composer-2.5-fast"],
-  "packages": ["pi-flow"],
+  "enabledModels": [
+    "composer-2.5",
+    "composer-2.5-fast"
+  ],
+  "packages": [
+    "pi-flow"
+  ],
   "piFlow": {
     "policy": {
       "blockDestructiveShell": true,
@@ -12,26 +17,94 @@
       "preferTrashOverRm": true
     },
     "modelRoles": {
-      "goal": { "model": "composer-2.5", "thinking": "high" },
-      "plan": { "model": "composer-2.5", "thinking": "high" },
-      "build": { "model": "composer-2.5", "thinking": "medium" },
-      "review": { "model": "composer-2.5", "thinking": "high" }
+      "goal": {
+        "model": "composer-2.5",
+        "thinking": "high"
+      },
+      "plan": {
+        "model": "composer-2.5",
+        "thinking": "high"
+      },
+      "build": {
+        "model": "composer-2.5",
+        "thinking": "medium"
+      },
+      "review": {
+        "model": "composer-2.5",
+        "thinking": "high"
+      }
+    },
+    "sessionNaming": {
+      "autoNameFromFirstPrompt": true,
+      "prefixGoal": true,
+      "maxTitleLength": 56
+    },
+    "session": {
+      "continueOnStart": true,
+      "preferBossSession": true
+    },
+    "memory": {
+      "enabled": true,
+      "recallOnStart": true,
+      "maxRecallChars": 2400,
+      "journalMaxPreview": 400
+    },
+    "progress": {
+      "stallAfterMs": 90000,
+      "checkIntervalMs": 8000,
+      "telemetryIntervalMs": 2000,
+      "aliveWindowMs": 25000,
+      "llmFirstByteMs": 120000,
+      "toolStallMs": 180000,
+      "rescue": {
+        "enabled": true,
+        "nudgeAtFraction": 0.7,
+        "maxAttemptsPerTurn": 2,
+        "maxAttemptsPerSession": 8,
+        "cooldownMs": 120000,
+        "compactAbovePercent": 85
+      }
+    },
+    "agentstorm": {
+      "defaultCount": 20,
+      "defaultConcurrency": 4,
+      "maxCount": 128,
+      "defaultAgent": "researcher"
     }
   },
   "subagents": {
     "orchestratorFirst": true,
     "agentOverrides": {
-      "scout": { "model": "composer-2.5" },
+      "scout": {
+        "model": "composer-2.5"
+      },
       "researcher": {
         "model": "composer-2.5",
-        "tools": "read, bash, mcp:browserbase",
-        "skills": "browserbase",
+        "tools": [
+          "read",
+          "bash",
+          "mcp:browserbase"
+        ],
+        "skills": [
+          "browserbase"
+        ],
         "inheritSkills": false
       },
-      "planner": { "model": "composer-2.5", "thinking": "high" },
-      "worker": { "model": "composer-2.5" },
-      "reviewer": { "model": "composer-2.5", "thinking": "high" },
-      "oracle": { "model": "composer-2.5", "thinking": "high" }
+      "planner": {
+        "model": "composer-2.5",
+        "thinking": "high"
+      },
+      "worker": {
+        "model": "composer-2.5"
+      },
+      "reviewer": {
+        "model": "composer-2.5",
+        "thinking": "high"
+      },
+      "oracle": {
+        "model": "composer-2.5",
+        "thinking": "high"
+      }
     },
     "isolation": {
       "mode": "worktree",

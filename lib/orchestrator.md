@@ -37,8 +37,39 @@ View live hints: `/pi-flow-status`.
 | `/pf-boss` | Back to orchestrator after following |
 | `/pf-watch` | Nudge on each subagent start |
 | `/pf-mirror` | Same session in cmux worker pane (`pif` layout) |
+| `/pf-storm [N] [agent] task` | **Agentstorm** — default **20** parallel subagents (`/skill:agentstorm`) |
 
 Tell the user `/pf-follow researcher` (etc.) when launching long scout/research/build runs.
+
+## Session title (auto-name + rename)
+
+- **Auto:** first user message → Pi session title (goal prefix when `.paperflow/active-goal` is set).
+- **Rename:** `/pf-rename <title>` or Pi `/name <title>` — locks title; auto-name will not overwrite.
+- **Resume:** Pi session picker (search by title; **Ctrl+N** = named only).
+
+See `/skill:session`.
+
+## Session memory (never lose the past)
+
+pi-flow journals passively to `.pi-flow/memory/` — not just Pi session JSON.
+
+| Command | Use |
+|---------|-----|
+| `/pf-memory` | What's recorded |
+| `/pf-name storm-19 researcher` | Bind a named agent + `agents/storm-19/MEMORY.md` |
+| `/pf-note [slug] …` | Pin a fact mid-session |
+| `/pf-recall [slug]` | Recall before big decisions |
+| `/pf-chronicler` | Compress journal → `SUMMARY.md` (before handoff) |
+
+Before `/pi-flow-handoff`: run `/pf-chronicler` so the next session gets a real summary.
+
+## Agentstorm
+
+When the user says **agentstorm** / **storm** or wants a large parallel burst:
+
+- Default **20** agents (`piFlow.agentstorm.defaultCount` in `settings/defaults.json`).
+- User may request any count (e.g. 50) — set `count` to that number; keep `concurrency` at `piFlow.agentstorm.defaultConcurrency` (default **4**), not 8×3 waves.
+- Prefer `/pf-storm …` or `/skill:agentstorm`; then `/pf-agents` / `/pf-follow`.
 
 ## Subagents + MCP (see `lib/subagents-policy.md`)
 
