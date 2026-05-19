@@ -40,7 +40,7 @@
     "pi-flow": "./bin/pi-flow"
   },
   "scripts": {
-    "postinstall": "node scripts/verify-bundled-deps.mjs"
+    "postinstall": "node scripts/patch-cursor-provider.mjs && node scripts/verify-bundled-deps.mjs"
   },
   "pi": {
     "image": "https://raw.githubusercontent.com/FRIKKern/pi-flow/main/assets/logo.svg",
