@@ -16,13 +16,10 @@ import {
 } from "../shared/settings-loader.ts";
 import { formatPiFlowStatus } from "../shared/status.ts";
 import {
-	BROWSERBASE_ENV_FILE,
-	browserbaseEnvConfigured,
-	checkBrowserbaseCloud,
-	ensureBrowseCli,
+	formatBrowserbaseSetupReport,
 	loadBrowserbaseEnvFile,
+	runBrowserbaseSetup,
 } from "../shared/browserbase.ts";
-import { applyBrowserbaseMcp } from "../shared/mcp-browserbase.ts";
 import { updatePiFlowPackage } from "../shared/update-package.ts";
 import { applyPiFlowSettings } from "./apply-settings.ts";
 import { installPiFlowAgents } from "./install-agents.ts";
@@ -70,6 +67,13 @@ function installAgents(ctx: ExtensionContext, cwd = process.cwd()): void {
 export default function piFlowSetup(pi: ExtensionAPI): void {
 	pi.on("session_start", async (_event, ctx) => {
 		loadBrowserbaseEnvFile();
+		// Lightweight: ensure MCP + env file exist; defer browse install to /pi-flow-setup
+		try {
+			const { applyBrowserbaseMcp } = await import("../shared/mcp-browserbase.ts");
+			applyBrowserbaseMcp({ packageRoot, mode: "hosted" });
+		} catch {
+			// ignore
+		}
 		try {
 			installAgents(ctx);
 		} catch (error) {
@@ -92,6 +96,7 @@ export default function piFlowSetup(pi: ExtensionAPI): void {
 					initBeads: true,
 				});
 				const host = await ensurePaperflowHost();
+				const browserbase = await runBrowserbaseSetup({ packageRoot });
 
 				ctx.ui.notify(
 					[
@@ -103,9 +108,10 @@ export default function piFlowSetup(pi: ExtensionAPI): void {
 						`Project: ${project.path}`,
 						`Host: ${host.running ? "running" : "not running"} — ${host.detail}`,
 						"",
+						formatBrowserbaseSetupReport(browserbase),
+						"",
 						"Start: /skill:autopilot \"…\"  or  /skill:goal",
 						"Status: /pi-flow-status · Doctor: /pi-flow-doctor",
-						"Browserbase: /pi-flow-browserbase-setup",
 						"Handoff: /pi-flow-handoff [focus]",
 						"",
 						"Docs: README.md · docs/BEST-PRACTICES.md",
@@ -209,45 +215,16 @@ export default function piFlowSetup(pi: ExtensionAPI): void {
 
 	pi.registerCommand("pi-flow-browserbase-setup", {
 		description:
-			"Install browse CLI, merge Browserbase MCP config, verify cloud API (optional stdio mode)",
+			"Install browse CLI, merge Browserbase MCP config, verify cloud API (optional: stdio)",
 		handler: async (args, ctx) => {
 			const mode = args.trim().toLowerCase() === "stdio" ? "stdio" : "hosted";
-			loadBrowserbaseEnvFile();
-
-			const browse = await ensureBrowseCli();
-			const mcp = applyBrowserbaseMcp({ mode, packageRoot, force: mode === "stdio" });
-
-			let cloudLine = "Cloud: skipped (set BROWSERBASE_API_KEY to verify)";
-			if (browserbaseEnvConfigured() && browse.ok) {
-				const list = await checkBrowserbaseCloud();
-				cloudLine = `Cloud: ${list.status} — ${list.detail}`;
-			}
-
-			ctx.ui.notify(
-				[
-					"pi-flow Browserbase setup",
-					"",
-					`CLI (browse): ${browse.ok ? browse.detail : browse.detail}`,
-					`MCP: ${mcp.detail}`,
-					cloudLine,
-					"",
-					"Credentials (never commit keys):",
-					`  export BROWSERBASE_API_KEY=…  # browserbase.com/settings`,
-					`  export BROWSERBASE_PROJECT_ID=…  # optional for stdio MCP`,
-					`  Or file: ${BROWSERBASE_ENV_FILE}`,
-					"",
-					"Pi tools: mcp({ server: \"browserbase\" }) then start · navigate · act · observe · extract",
-					"Verify: browse cloud sessions list",
-					"Docs: docs/BROWSERBASE.md · /skill:browserbase",
-					"",
-					mode === "hosted"
-						? "Stdio MCP (self-hosted): /pi-flow-browserbase-setup stdio"
-						: "Hosted MCP (default): /pi-flow-browserbase-setup",
-					"",
-					"/reload to refresh MCP tool cache",
-				].join("\n"),
-				browse.ok && mcp.merged ? "info" : "warning",
-			);
+			const result = await runBrowserbaseSetup({
+				packageRoot,
+				mode,
+				forceMcp: mode === "stdio",
+			});
+			const allOk = result.browse.ok && result.mcp.ok && result.cloud.ok;
+			ctx.ui.notify(formatBrowserbaseSetupReport(result), allOk ? "info" : "warning");
 		},
 	});
 
@@ -278,6 +255,7 @@ export default function piFlowSetup(pi: ExtensionAPI): void {
 					initBeads: true,
 				});
 				const host = await ensurePaperflowHost();
+				const browserbase = await runBrowserbaseSetup({ packageRoot });
 
 				ctx.ui.notify(
 					[
@@ -287,6 +265,8 @@ export default function piFlowSetup(pi: ExtensionAPI): void {
 						formatDepsReport(deps),
 						"",
 						`Host: ${host.running ? "running" : host.detail}`,
+						"",
+						formatBrowserbaseSetupReport(browserbase),
 						"",
 						"Tip: /reload if extensions feel stale",
 						"/pi-flow-status for full dashboard",

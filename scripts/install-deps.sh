@@ -38,16 +38,24 @@ install_bd() {
 }
 
 install_browse() {
+  PI_AGENT="${HOME}/.pi/agent"
+  PI_BIN="${PI_AGENT}/bin"
+  export PATH="${PI_BIN}:${PATH}"
   if command -v browse >/dev/null 2>&1; then
     ok "browse: $(browse --version 2>/dev/null | head -1 || echo present)"
     return 0
   fi
-  info "Installing Browserbase CLI (browse) via npm…"
-  if npm install -g browse; then
+  info "Installing Browserbase CLI (browse) to ${PI_AGENT}…"
+  if npm install browse --prefix "${PI_AGENT}" --no-fund --no-audit 2>/dev/null; then
+    ok "browse: $("${PI_BIN}/browse" --version 2>/dev/null | head -1 || echo installed in ${PI_BIN})"
+    return 0
+  fi
+  info "Retrying browse global install…"
+  if npm install -g browse --no-fund --no-audit; then
     ok "browse installed globally"
     return 0
   fi
-  warn "browse install failed — run: npm install -g browse"
+  warn "browse install failed — run /pi-flow-browserbase-setup in Pi"
   return 1
 }
 
