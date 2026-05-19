@@ -5,74 +5,72 @@ set -eo pipefail
 YES="${PI_FLOW_YES:-0}"
 export PAPERFLOW_YES="$YES"
 
-info() { printf '\033[36m→\033[0m %s\n' "$*"; }
-warn() { printf '\033[33m!\033[0m %s\n' "$*"; }
-die() { printf '\033[31m✗\033[0m %s\n' "$*" >&2; exit 1; }
-
-# curl | bash: BASH_SOURCE[0] is unset — download helper scripts from GitHub
-RAW_BASE="${PI_FLOW_RAW_BASE:-https://raw.githubusercontent.com/FRIKKern/pi-flow/main}"
-if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
-	SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-	DEPS_SCRIPT="${SCRIPT_DIR}/install-deps.sh"
+_CALLER="${BASH_SOURCE[0]:-}"
+if [ -n "$_CALLER" ] && [ -f "$_CALLER" ]; then
+	_SCRIPT_DIR="$(cd "$(dirname "$_CALLER")" && pwd)"
+	# shellcheck source=lib/bash-safe.sh
+	source "${_SCRIPT_DIR}/lib/bash-safe.sh"
+	pi_flow_init_scripts "$_CALLER"
 else
-	SCRIPT_DIR=""
-	TMPDIR_PF="$(mktemp -d -t pi-flow-update.XXXXXX)"
-	trap 'rm -rf "$TMPDIR_PF"' EXIT
-	DEPS_SCRIPT="${TMPDIR_PF}/install-deps.sh"
-	curl -fsSL "${RAW_BASE}/scripts/install-deps.sh" -o "$DEPS_SCRIPT" \
-		|| die "could not download install-deps.sh"
-	curl -fsSL "${RAW_BASE}/scripts/install-cmux-shell.sh" -o "${TMPDIR_PF}/install-cmux-shell.sh"
-	curl -fsSL "${RAW_BASE}/scripts/cmux-boss-layout.sh" -o "${TMPDIR_PF}/cmux-boss-layout.sh"
-	chmod +x "${TMPDIR_PF}/install-cmux-shell.sh" "${TMPDIR_PF}/cmux-boss-layout.sh"
-	export PI_FLOW_SCRIPTS_TMP="$TMPDIR_PF"
+	PI_FLOW_RAW_BASE="${PI_FLOW_RAW_BASE:-https://raw.githubusercontent.com/FRIKKern/pi-flow/main}"
+	_TMP="$(mktemp -d -t pi-flow-update.XXXXXX)"
+	trap 'rm -rf "$_TMP"' EXIT
+	mkdir -p "${_TMP}/lib"
+	curl -fsSL "${PI_FLOW_RAW_BASE}/scripts/lib/bash-safe.sh" -o "${_TMP}/lib/bash-safe.sh" \
+		|| { echo "✗ could not download bash-safe.sh" >&2; exit 1; }
+	# shellcheck source=lib/bash-safe.sh
+	source "${_TMP}/lib/bash-safe.sh"
+	pi_flow_fetch_script_bundle "$_TMP"
 fi
 
-info "pi-flow update"
+DEPS_SCRIPT="$(pi_flow_script_path install-deps.sh || true)"
+PAPERFLOW_INSTALL="$(pi_flow_script_path install-paperflow-host.sh || true)"
+
+if [ "${PI_FLOW_VERIFY:-0}" = "1" ]; then
+	[ -n "$DEPS_SCRIPT" ] && [ -f "$DEPS_SCRIPT" ] || pi_flow_die "verify: install-deps.sh missing"
+	[ -n "$PAPERFLOW_INSTALL" ] && [ -f "$PAPERFLOW_INSTALL" ] || pi_flow_die "verify: install-paperflow-host.sh missing"
+	pi_flow_ok "update verify: script bundle ok"
+	exit 0
+fi
+
+pi_flow_info "pi-flow update"
 
 if ! command -v node >/dev/null 2>&1; then
-	die "Node.js 20+ required — https://nodejs.org/"
+	pi_flow_die "Node.js 20+ required — https://nodejs.org/"
 fi
 
 if ! command -v pi >/dev/null 2>&1; then
-	info "Pi not found — installing @earendil-works/pi-coding-agent…"
-	npm install -g @earendil-works/pi-coding-agent || die "failed to install Pi — try: npm install -g @earendil-works/pi-coding-agent"
+	pi_flow_info "Pi not found — installing @earendil-works/pi-coding-agent…"
+	npm install -g @earendil-works/pi-coding-agent \
+		|| pi_flow_die "failed to install Pi"
 fi
 
-if [ -f "$DEPS_SCRIPT" ]; then
+if [ -n "$DEPS_SCRIPT" ] && [ -f "$DEPS_SCRIPT" ]; then
 	bash "$DEPS_SCRIPT" || true
 else
-	warn "install-deps.sh not available"
+	pi_flow_warn "install-deps.sh not available"
 fi
 
-info "Updating pi-flow package…"
+pi_flow_info "Updating pi-flow package…"
 pi update git:github.com/FRIKKern/pi-flow 2>/dev/null || pi install git:github.com/FRIKKern/pi-flow
 
 if [ -d "$(pwd)/.git" ] || [ -f "$(pwd)/package.json" ]; then
 	export PI_FLOW_REPO_DIR="$(pwd)"
-	if [ -f "$DEPS_SCRIPT" ]; then
+	if [ -n "$DEPS_SCRIPT" ] && [ -f "$DEPS_SCRIPT" ]; then
 		bash "$DEPS_SCRIPT" || true
 	fi
 fi
 
-PAPERFLOW_INSTALL="${SCRIPT_DIR:+$SCRIPT_DIR/}install-paperflow-host.sh"
-if [ -z "$SCRIPT_DIR" ] || [ ! -f "$PAPERFLOW_INSTALL" ]; then
-	curl -fsSL "${RAW_BASE}/scripts/install-paperflow-host.sh" -o "${TMPDIR_PF}/install-paperflow-host.sh"
-	PAPERFLOW_INSTALL="${TMPDIR_PF}/install-paperflow-host.sh"
-fi
-
-if [ -f "$PAPERFLOW_INSTALL" ] && bash "$PAPERFLOW_INSTALL"; then
-	info "paperflow host refreshed"
+if [ -n "$PAPERFLOW_INSTALL" ] && [ -f "$PAPERFLOW_INSTALL" ] && bash "$PAPERFLOW_INSTALL"; then
+	pi_flow_info "paperflow host refreshed"
 else
-	warn "paperflow host install skipped or failed"
+	pi_flow_warn "paperflow host install skipped or failed"
 fi
 
 cat <<'EOF'
 
 ✓ Update complete
 
-In Pi (project repo):
-  /pi-flow-update
-  /pi-flow-setup
-  /pi-flow-doctor
+In Pi: /pi-flow-update · /pi-flow-setup · /pi-flow-status
 
 EOF

@@ -1,6 +1,6 @@
 {
   "name": "pi-flow",
-  "version": "0.8.4",
+  "version": "0.8.5",
   "description": "Paperflow lifecycle in Pi (CMUX): goal → plan → grill → build → review. HTML artifacts, Beads, MCP subagents. Model-agnostic; Composer 2.5 default.",
   "type": "module",
   "license": "MIT",
@@ -40,7 +40,8 @@
     "pi-flow": "./bin/pi-flow"
   },
   "scripts": {
-    "postinstall": "node scripts/patch-cursor-provider.mjs && node scripts/verify-bundled-deps.mjs"
+    "postinstall": "node scripts/patch-cursor-provider.mjs && node scripts/verify-bundled-deps.mjs",
+    "verify:install-scripts": "bash scripts/verify-install-scripts.sh"
   },
   "pi": {
     "image": "https://raw.githubusercontent.com/FRIKKern/pi-flow/main/assets/logo.svg",

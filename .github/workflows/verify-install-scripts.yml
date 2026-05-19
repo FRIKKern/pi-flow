@@ -1,0 +1,23 @@
+name: verify-install-scripts
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/**"
+      - ".github/workflows/verify-install-scripts.yml"
+  pull_request:
+    paths:
+      - "scripts/**"
+      - ".github/workflows/verify-install-scripts.yml"
+
+jobs:
+  verify:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run install script checks
+        env:
+          PI_FLOW_RAW_BASE: file://${{ github.workspace }}
+        run: bash scripts/verify-install-scripts.sh

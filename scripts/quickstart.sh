@@ -1,90 +1,81 @@
 #!/usr/bin/env bash
 # pi-flow quickstart — one command: Pi, beads, pi-flow, paperflow host
+# Safe: curl | bash · macOS bash 3.2 · no set -u on entry
 set -eo pipefail
 
 YES="${PI_FLOW_YES:-0}"
 export PAPERFLOW_YES="$YES"
 
-info() { printf '\033[36m→\033[0m %s\n' "$*"; }
-warn() { printf '\033[33m!\033[0m %s\n' "$*"; }
-die() { printf '\033[31m✗\033[0m %s\n' "$*" >&2; exit 1; }
-
-# When run via curl | bash, BASH_SOURCE[0] is unset. Detect that and fetch
-# install-deps.sh from the raw GitHub URL into a temp dir.
-RAW_BASE="${PI_FLOW_RAW_BASE:-https://raw.githubusercontent.com/FRIKKern/pi-flow/main}"
-if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
-	SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-	DEPS_SCRIPT="${SCRIPT_DIR}/install-deps.sh"
+# ── Resolve script dir or download bundle (curl | bash) ─────────────
+_CALLER="${BASH_SOURCE[0]:-}"
+if [ -n "$_CALLER" ] && [ -f "$_CALLER" ]; then
+	_SCRIPT_DIR="$(cd "$(dirname "$_CALLER")" && pwd)"
+	# shellcheck source=lib/bash-safe.sh
+	source "${_SCRIPT_DIR}/lib/bash-safe.sh"
+	pi_flow_init_scripts "$_CALLER"
 else
-	SCRIPT_DIR=""
-	TMPDIR_PF="$(mktemp -d -t pi-flow-quickstart.XXXXXX)"
-	trap 'rm -rf "$TMPDIR_PF"' EXIT
-	DEPS_SCRIPT="${TMPDIR_PF}/install-deps.sh"
-	curl -fsSL "${RAW_BASE}/scripts/install-deps.sh" -o "$DEPS_SCRIPT" \
-		|| warn "could not download install-deps.sh"
-	curl -fsSL "${RAW_BASE}/scripts/install-cmux-shell.sh" -o "${TMPDIR_PF}/install-cmux-shell.sh" 2>/dev/null || true
-	curl -fsSL "${RAW_BASE}/scripts/cmux-boss-layout.sh" -o "${TMPDIR_PF}/cmux-boss-layout.sh" 2>/dev/null || true
-	chmod +x "${TMPDIR_PF}/install-cmux-shell.sh" "${TMPDIR_PF}/cmux-boss-layout.sh" 2>/dev/null || true
-	export PI_FLOW_SCRIPTS_TMP="$TMPDIR_PF"
+	PI_FLOW_RAW_BASE="${PI_FLOW_RAW_BASE:-https://raw.githubusercontent.com/FRIKKern/pi-flow/main}"
+	_TMP="$(mktemp -d -t pi-flow-quickstart.XXXXXX)"
+	trap 'rm -rf "$_TMP"' EXIT
+	mkdir -p "${_TMP}/lib"
+	curl -fsSL "${PI_FLOW_RAW_BASE}/scripts/lib/bash-safe.sh" -o "${_TMP}/lib/bash-safe.sh" \
+		|| { echo "✗ could not download bash-safe.sh" >&2; exit 1; }
+	# shellcheck source=lib/bash-safe.sh
+	source "${_TMP}/lib/bash-safe.sh"
+	pi_flow_fetch_script_bundle "$_TMP"
 fi
 
-info "pi-flow quickstart"
+DEPS_SCRIPT="$(pi_flow_script_path install-deps.sh || true)"
+PAPERFLOW_INSTALL="$(pi_flow_script_path install-paperflow-host.sh || true)"
+
+if [ "${PI_FLOW_VERIFY:-0}" = "1" ]; then
+	[ -n "$DEPS_SCRIPT" ] && [ -f "$DEPS_SCRIPT" ] || pi_flow_die "verify: install-deps.sh missing"
+	[ -n "$PAPERFLOW_INSTALL" ] && [ -f "$PAPERFLOW_INSTALL" ] || pi_flow_die "verify: install-paperflow-host.sh missing"
+	pi_flow_ok "quickstart verify: script bundle ok"
+	exit 0
+fi
+
+pi_flow_info "pi-flow quickstart"
 
 if ! command -v node >/dev/null 2>&1; then
-	die "Node.js 20+ required — https://nodejs.org/"
+	pi_flow_die "Node.js 20+ required — https://nodejs.org/"
 fi
 
-# ── 1. System deps (beads, jq) ─────────────────────────────────────
-info "Installing dependencies (beads, jq)…"
-if [ -f "$DEPS_SCRIPT" ]; then
-	bash "$DEPS_SCRIPT" || warn "some deps need manual install"
+pi_flow_info "Installing dependencies (beads, jq)…"
+if [ -n "$DEPS_SCRIPT" ] && [ -f "$DEPS_SCRIPT" ]; then
+	bash "$DEPS_SCRIPT" || pi_flow_warn "some deps need manual install"
 else
-	warn "install-deps.sh not available — skipping (install beads/jq manually)"
+	pi_flow_warn "install-deps.sh not available — install beads/jq manually"
 fi
 
-# ── 2. Pi CLI ───────────────────────────────────────────────────────
 if ! command -v pi >/dev/null 2>&1; then
-	info "Installing Pi coding agent…"
-	npm install -g @earendil-works/pi-coding-agent
+	pi_flow_info "Installing Pi coding agent…"
+	npm install -g @earendil-works/pi-coding-agent \
+		|| pi_flow_die "failed to install Pi"
 fi
 
-# ── 3. pi-flow package (pulls @beads/bd into package node_modules) ───
 if ! pi list 2>/dev/null | grep -q 'pi-flow'; then
-	info "Installing pi-flow package…"
+	pi_flow_info "Installing pi-flow package…"
 	pi install git:github.com/FRIKKern/pi-flow
 else
-	info "Updating pi-flow…"
+	pi_flow_info "Updating pi-flow…"
 	pi update git:github.com/FRIKKern/pi-flow 2>/dev/null || pi install git:github.com/FRIKKern/pi-flow
 fi
 
-# Re-run deps so bundled bd is available after npm install in pi package dir
-if [ -f "$DEPS_SCRIPT" ]; then
+if [ -n "$DEPS_SCRIPT" ] && [ -f "$DEPS_SCRIPT" ]; then
 	bash "$DEPS_SCRIPT" || true
 fi
 
-# ── 4. paperflow host ───────────────────────────────────────────────
-PAPERFLOW_INSTALL="${SCRIPT_DIR:+$SCRIPT_DIR/}install-paperflow-host.sh"
-if [ -z "$SCRIPT_DIR" ] || [ ! -f "$PAPERFLOW_INSTALL" ]; then
-	PAPERFLOW_INSTALL="${TMPDIR_PF:-}/install-paperflow-host.sh"
-	if [ ! -f "$PAPERFLOW_INSTALL" ]; then
-		TMP_PF_HOST="$(mktemp -d -t pi-flow-pf.XXXXXX)"
-		curl -fsSL "${RAW_BASE}/scripts/install-paperflow-host.sh" -o "$TMP_PF_HOST/install-paperflow-host.sh" \
-			|| PAPERFLOW_INSTALL=""
-		PAPERFLOW_INSTALL="${TMP_PF_HOST}/install-paperflow-host.sh"
-	fi
-fi
-
-if [ -f "$PAPERFLOW_INSTALL" ] && bash "$PAPERFLOW_INSTALL"; then
-	info "paperflow host installed"
+if [ -n "$PAPERFLOW_INSTALL" ] && [ -f "$PAPERFLOW_INSTALL" ] && bash "$PAPERFLOW_INSTALL"; then
+	pi_flow_info "paperflow host installed"
 else
-	warn "paperflow host install failed — Pi-only mode still works"
+	pi_flow_warn "paperflow host install failed — Pi-only mode still works"
 fi
 
-# ── 5. cmux (optional) ──────────────────────────────────────────────
 if command -v brew >/dev/null 2>&1 && ! command -v cmux >/dev/null 2>&1; then
-	info "Optional cmux: brew tap manaflow-ai/cmux && brew install --cask cmux"
+	pi_flow_info "Optional cmux: brew tap manaflow-ai/cmux && brew install --cask cmux"
 elif command -v cmux >/dev/null 2>&1; then
-	info "cmux: installed"
+	pi_flow_info "cmux: installed"
 fi
 
 cat <<'EOF'
@@ -93,22 +84,20 @@ cat <<'EOF'
 
 In your project repo:
   cd your-repo
-  bd init                    # if .beads/ missing (setup does this too)
+  bd init
 
 In Pi:
   /pi-flow-setup
-  /pi-flow-doctor
+  /pi-flow-status
   /skill:autopilot "your vision"
 
 cmux (recommended):
-  source ~/.zshrc   # pf / pif aliases
-  pif --cwd "$(pwd)" my-goal    # boss layout + Pi + :8767 browser
-  # or simple: scripts/cmux-layout.sh "$(pwd)" my-goal
+  source ~/.zshrc
+  pif --cwd "$(pwd)" my-goal
 
-Updates later:
+Updates:
   curl -fsSL https://raw.githubusercontent.com/FRIKKern/pi-flow/main/scripts/update.sh | bash
-  # or in Pi: /pi-flow-update
 
-Docs: https://github.com/FRIKKern/pi-flow#readme
+Docs: https://github.com/FRIKKern/pi-flow#readme · docs/INSTALL-SCRIPTS.md
 
 EOF

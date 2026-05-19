@@ -32,6 +32,8 @@ Unattended:
 PI_FLOW_YES=1 curl -fsSL https://raw.githubusercontent.com/FRIKKern/pi-flow/main/scripts/quickstart.sh | bash
 ```
 
+Install scripts are tested on **macOS bash 3.2** and **`curl | bash`** (see [docs/INSTALL-SCRIPTS.md](./docs/INSTALL-SCRIPTS.md)). If something breaks, run `bash scripts/verify-install-scripts.sh` in the repo and open an issue.
+
 ## Update
 
 ```bash
