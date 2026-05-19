@@ -79,7 +79,7 @@ Grill answers happen in chat; doc verify may `SKIP` without the host. Works, but
 |-------|------|
 | **Skills** | `goal` · `plan` · `build` · `review` · `autopilot` · `resume` |
 | **CMUX skills** | `cmux` · `cmux-browser` (loaded when cmux is detected) |
-| **Pi tools** | `paperflow_verify` · `paperflow_cmux` · `paperflow_active_goal` |
+| **Pi tools** | `paperflow_host` · `paperflow_verify` · `paperflow_beads` · `paperflow_cmux` · `paperflow_active_goal` |
 | **Subagents** | `pi-flow.doc-writer` · `bd-keeper` · `worker` · `scout` · … |
 | **Bundled** | `pi-subagents` · `pi-mcp-adapter` · optional `pi-cursor-provider` |
 
@@ -115,11 +115,15 @@ Grill answers happen in chat; doc verify may `SKIP` without the host. Works, but
 
 ## Architecture (short)
 
-- **Skills** = playbooks (markdown) — lifecycle stays here
-- **Extensions** = wires — session register, verify tools, goal context
-- **paperflow host** = browser + daemon — do not duplicate in pi-flow
+- **Skills** = playbooks — lifecycle stays here
+- **Extensions** = tools + session register (daemon stays **external**)
+- **paperflow host** = `:8767` — `paperflow_host ensure`, not embedded in Pi
 
-See **[docs/EXTENSIONS.md](./docs/EXTENSIONS.md)** for the split between `pi-flow-setup` and `pi-flow-host`.
+| Doc | Topic |
+|-----|--------|
+| [docs/BEST-PRACTICES.md](./docs/BEST-PRACTICES.md) | Pi patterns vs paperflow anti-patterns |
+| [docs/HOST.md](./docs/HOST.md) | Why daemon is external + ensure flow |
+| [docs/EXTENSIONS.md](./docs/EXTENSIONS.md) | Extension split |
 
 ## Docs
 

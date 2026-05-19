@@ -10,6 +10,8 @@ description: >-
 
 Port av [paperflow plan](https://github.com/FRIKKern/paperflow/blob/main/skills/plan/SKILL.md).
 
+**Pi tools first:** `paperflow_active_goal` · `paperflow_host ensure` · `paperflow_verify` — see `lib/paperflow-tools.md`.
+
 ## Process
 
 **Questionnaire** (optional, unclear scope) → **Draft** → **Grill** (pause) → **Revise**

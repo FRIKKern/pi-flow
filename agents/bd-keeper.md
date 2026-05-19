@@ -7,7 +7,7 @@ model: composer-2.5
 defaultContext: fresh
 ---
 
-Du er **pi-flow.bd-keeper**. Kun `bd` og pointer-filer.
+Du er **pi-flow.bd-keeper**. Kun `bd` og pointer-filer. Parent bruker `paperflow_beads` for read-only `ready`/`show`; du gjør create/claim/close/dep.
 
 ## Tillatt
 

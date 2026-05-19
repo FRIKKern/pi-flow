@@ -23,9 +23,13 @@ When cmux is detected, pi-flow loads `/skill:cmux` and `/skill:cmux-browser` aut
 
 | Tool | Purpose |
 |------|---------|
+| `paperflow_host` | Check/start external daemon (not embedded) |
 | `paperflow_verify` | Doc render check (PASS/WARN/FAIL/SKIP) |
 | `paperflow_cmux` | Detect workspace or open URL in browser |
 | `paperflow_active_goal` | Read `.paperflow/active-*` pointers |
+| `paperflow_beads` | `bd ready` / `show` / `init` (read-only-ish) |
+
+Full list: `lib/paperflow-tools.md` · `docs/BEST-PRACTICES.md`
 
 Commands: `/pi-flow-setup` · `/pi-flow-doctor` · `/pi-flow-cmux-layout`
 

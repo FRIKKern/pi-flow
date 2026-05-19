@@ -1,16 +1,18 @@
 # pi-flow setup
 
-```
-/pi-flow-setup
-```
-
-1. Optional: `/login cursor` + `/model` if using Composer 2.5 via Cursor
-2. paperflow host: `curl -fsSL https://raw.githubusercontent.com/FRIKKern/paperflow/main/scripts/quickstart.sh | bash`
-3. `.mcp.json` from `.mcp.json.example`
-4. `/pi-flow-doctor`
-
-Start:
+Run once per machine and per repo:
 
 ```text
-/skill:goal "your vision"
+/pi-flow-setup
+/pi-flow-doctor
 ```
+
+Optional: `/login cursor` for Composer 2.5 default.
+
+Then:
+
+```text
+/skill:autopilot "your vision"
+```
+
+See `lib/paperflow-tools.md` for Pi tools. Host integration: `docs/HOST.md`.

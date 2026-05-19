@@ -1,6 +1,8 @@
 import * as os from "node:os";
 import * as path from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { formatDoctorReport, runPiFlowDoctor } from "../shared/doctor.ts";
+import { ensurePaperflowHost } from "../shared/host-manager.ts";
 import { resolvePackageRoot } from "../shared/package-root.ts";
 import { applyPiFlowSettings } from "./apply-settings.ts";
 import { installPiFlowAgents } from "./install-agents.ts";
@@ -44,29 +46,29 @@ export default function piFlowSetup(pi: ExtensionAPI): void {
 	});
 
 	pi.registerCommand("pi-flow-setup", {
-		description: "Apply pi-flow defaults, install agents, print next steps",
+		description: "Apply settings, install agents, ensure paperflow host",
 		handler: async (_args, ctx) => {
 			try {
 				const global = applyPiFlowSettings("global");
 				const project = applyPiFlowSettings("project", process.cwd());
 				installAgents(ctx);
 
+				const host = await ensurePaperflowHost();
+
 				ctx.ui.notify(
 					[
 						"pi-flow setup complete.",
 						"",
-						`Global settings: ${global.path}`,
-						`Project settings: ${project.path}`,
-						`Agents: .pi/agents/${NAMESPACE}/ (project) + ~/.pi/agent/agents/${NAMESPACE}.*`,
+						`Settings: ${global.path}`,
+						`Project: ${project.path}`,
+						`Host: ${host.running ? "running" : "not running"} — ${host.detail}`,
 						"",
-						"Next:",
-						"  1. paperflow host — curl -fsSL …/paperflow/…/quickstart.sh | bash",
-						"  2. cmux workspace — scripts/cmux-layout.sh <repo> <goal>",
-						"  3. In Pi: /login cursor (optional) · /skill:autopilot \"…\"",
+						"Start: /skill:autopilot \"…\"  or  /skill:goal",
+						"Doctor: /pi-flow-doctor",
 						"",
-						"Docs: README.md · docs/CMUX.md",
+						"Docs: README.md · docs/BEST-PRACTICES.md",
 					].join("\n"),
-					"info",
+					host.running ? "info" : "warning",
 				);
 			} catch (error) {
 				const message = error instanceof Error ? error.message : String(error);
@@ -76,49 +78,25 @@ export default function piFlowSetup(pi: ExtensionAPI): void {
 	});
 
 	pi.registerCommand("pi-flow-doctor", {
-		description: "pi-flow + cmux + paperflow host checklist",
+		description: "Run live pi-flow + paperflow + cmux checks",
 		handler: async (_args, ctx) => {
-			const cmuxEnv = process.env.CMUX_WORKSPACE_ID
-				? `cmux env: workspace ${String(process.env.CMUX_WORKSPACE_ID).slice(0, 8)}…`
-				: "cmux env: CMUX_WORKSPACE_ID not set";
-
-			ctx.ui.notify(
-				[
-					"pi-flow doctor",
-					"",
-					cmuxEnv,
-					"Host tools: paperflow_verify · paperflow_cmux · paperflow_active_goal",
-					"",
-					"Shell checks:",
-					"  paperflow-preflight · paperflow-doctor --fast",
-					"  paperflow-doc-verify <url>",
-					"",
-					"Pi package:",
-					"  pi-subagents · pi-mcp-adapter · pi-cursor-provider (optional)",
-					"",
-					`Agents: ${globalAgentsDir} (${NAMESPACE}.*)`,
-					`Project: ${path.join(process.cwd(), ".pi", "agents", NAMESPACE)}`,
-					"",
-					"Skills: /skill:goal … /skill:cmux (in cmux)",
-					"Docs: docs/CMUX.md · docs/EXTENSIONS.md",
-				].join("\n"),
-				"info",
-			);
+			const checks = await runPiFlowDoctor(process.cwd(), packageRoot);
+			ctx.ui.notify(formatDoctorReport(checks), "info");
 		},
 	});
 
 	pi.registerCommand("pi-flow-cmux-layout", {
-		description: "Print recommended cmux new-workspace command for this repo",
+		description: "Print cmux workspace command for this repo",
 		handler: async (_args, ctx) => {
-			const repo = process.cwd();
 			const script = path.join(packageRoot, "scripts", "cmux-layout.sh");
 			ctx.ui.notify(
 				[
-					"Run in a shell (outside Pi):",
-					`${script} "${repo}" my-goal`,
+					"Run in shell (outside Pi):",
+					`curl -fsSL https://raw.githubusercontent.com/FRIKKern/pi-flow/main/scripts/cmux-layout.sh | bash -s -- "${process.cwd()}" my-goal`,
 					"",
-					"Then split browser right → http://localhost:8767/",
-					"See docs/CMUX.md",
+					`Or locally: ${script} "${process.cwd()}" my-goal`,
+					"",
+					"Browser pane → http://localhost:8767/",
 				].join("\n"),
 				"info",
 			);

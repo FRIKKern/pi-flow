@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Register this Pi session with paperflow-daemon so grill Submit and doc buttons
-# can cmux send back to the Pi surface. Mirrors paperflow-session-register for Pi.
+# Legacy CLI — pi-flow-host registers on session_start via HTTP.
+# Kept for debugging: pi-flow-session-register
+# Register this Pi session with paperflow-daemon so grill Submit routes to Pi.
 set -euo pipefail
 
 LOG_DIR="${HOME}/.paperflow/logs"

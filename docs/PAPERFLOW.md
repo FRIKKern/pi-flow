@@ -22,7 +22,7 @@
 | `paperflow-bd-keeper` | `pi-flow.bd-keeper` |
 | `paperflow-researcher` | `pi-flow.researcher` |
 | `paperflow-code-editor` | `pi-flow.worker` |
-| `paperflow-cmux-verifier` | manual / reviewer + browser MCP |
+| `paperflow-cmux-verifier` | `pi-flow.cmux-verifier` + `paperflow_verify` tool |
 
 ## What stays in paperflow host only
 

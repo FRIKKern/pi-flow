@@ -1,29 +1,17 @@
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
+import { resolvePackageRoot } from "../shared/package-root.ts";
 
-/**
- * Defaults merged by /pi-flow-setup.
- * Model/provider are team defaults — change via /model and /login anytime.
- */
-export const PI_FLOW_DEFAULTS = {
-	defaultProvider: "cursor",
-	defaultModel: "composer-2.5",
-	defaultThinkingLevel: "medium",
-	enabledModels: ["composer-2.5", "composer-2.5-fast"],
-	packages: ["pi-flow"],
-	subagents: {
-		agentOverrides: {
-			scout: { model: "composer-2.5" },
-			researcher: { model: "composer-2.5" },
-			worker: { model: "composer-2.5" },
-			reviewer: { model: "composer-2.5" },
-			oracle: { model: "composer-2.5" },
-			planner: { model: "composer-2.5" },
-			"doc-writer": { model: "composer-2.5" },
-		},
-	},
-} as const;
+const packageRoot = resolvePackageRoot(import.meta.url);
+const defaultsPath = path.join(packageRoot, "settings", "defaults.json");
+
+function loadDefaults(): Record<string, unknown> {
+	const raw = fs.readFileSync(defaultsPath, "utf8");
+	return JSON.parse(raw) as Record<string, unknown>;
+}
+
+export const PI_FLOW_DEFAULTS = loadDefaults();
 
 export interface ApplySettingsResult {
 	path: string;
@@ -58,10 +46,10 @@ export function applyPiFlowSettings(
 		created = true;
 	}
 
-	const merged = deepMerge(existing, PI_FLOW_DEFAULTS as Record<string, unknown>);
+	const merged = deepMerge(existing, PI_FLOW_DEFAULTS);
 	merged.packages = mergePackageList(
 		existing.packages,
-		PI_FLOW_DEFAULTS.packages,
+		(PI_FLOW_DEFAULTS.packages as string[]) ?? ["pi-flow"],
 	);
 	fs.writeFileSync(settingsPath, `${JSON.stringify(merged, null, 2)}\n`, "utf8");
 

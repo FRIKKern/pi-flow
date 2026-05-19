@@ -10,14 +10,12 @@ description: >-
 
 Pi-port av [paperflow goal](https://github.com/FRIKKern/paperflow/blob/main/skills/goal/SKILL.md). Orchestrator følger `lib/paperflow-thresholds.md`.
 
-## Step 0 — Host (når paperflow er installert)
+## Step 0 — Host
 
-```bash
-~/.local/bin/paperflow-preflight
-~/.local/bin/paperflow-doctor --fast
-```
+1. **`paperflow_host`** `{ action: "ensure" }` — start/check daemon :8767
+2. Optional shell: `paperflow-preflight` (abort on critical)
 
-Abort ved critical (exit 2). Pi-only uten host: hopp over, bruk `docs/paperflow/` fallback.
+Pi-only uten host: hopp over verify/auto-open, bruk `docs/paperflow/` fallback. Se `docs/HOST.md`.
 
 ## Åpne Goal
 

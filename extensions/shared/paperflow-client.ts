@@ -2,11 +2,12 @@ import { execFile } from "node:child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { promisify } from "node:util";
+import { DAEMON_URL } from "./constants.ts";
+import { PAPERFLOW_BIN } from "./paths.ts";
 
 const execFileAsync = promisify(execFile);
 
-export const DAEMON_URL =
-	process.env.PAPERFLOW_DAEMON_URL ?? "http://localhost:8767";
+export { DAEMON_URL };
 
 export interface CmuxDetect {
 	cmux?: boolean;
@@ -32,13 +33,8 @@ export async function cmuxDetectJson(): Promise<CmuxDetect | null> {
 		};
 	}
 
-	const detect =
-		process.env.PAPERFLOW_CMUX_DETECT ??
-		(process.env.HOME
-			? `${process.env.HOME}/.local/bin/paperflow-cmux-detect`
-			: "");
-
-	if (!detect) return null;
+	const detect = PAPERFLOW_BIN.cmuxDetect();
+	if (!detect || !fs.existsSync(detect)) return null;
 
 	try {
 		const { stdout } = await execFileAsync(detect, [], {
@@ -124,12 +120,7 @@ export async function verifyPaperflowDoc(
 	url: string,
 	kind?: string,
 ): Promise<{ verdict: string; line: string }> {
-	const verify =
-		process.env.PAPERFLOW_DOC_VERIFY ??
-		(process.env.HOME
-			? `${process.env.HOME}/.local/bin/paperflow-doc-verify`
-			: "paperflow-doc-verify");
-
+	const verify = PAPERFLOW_BIN.docVerify();
 	const args = [url];
 	if (kind) args.push("--kind", kind);
 
@@ -177,6 +168,19 @@ export function readActiveGoalContext(cwd: string): ActiveGoalContext | null {
 		phasePath: fs.existsSync(phasePath) ? phasePath : null,
 		summary: lines.join("\n"),
 	};
+}
+
+export function writeActiveGoalPointers(
+	cwd: string,
+	goalId: string,
+	phaseId?: string,
+): void {
+	const dir = path.join(cwd, ".paperflow");
+	fs.mkdirSync(dir, { recursive: true });
+	fs.writeFileSync(path.join(dir, "active-goal"), `${goalId.trim()}\n`, "utf8");
+	if (phaseId) {
+		fs.writeFileSync(path.join(dir, "active-phase"), `${phaseId.trim()}\n`, "utf8");
+	}
 }
 
 function readTrimmedFile(filePath: string): string | null {

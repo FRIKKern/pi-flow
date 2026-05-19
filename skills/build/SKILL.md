@@ -9,14 +9,15 @@ description: >-
 
 Port av [paperflow build](https://github.com/FRIKKern/paperflow/blob/main/skills/build/SKILL.md).
 
+**Pi tools:** `paperflow_beads` `ready` · `paperflow_active_goal` — mutations via `pi-flow.bd-keeper`.
+
 ## Loop
 
-```bash
-bd ready --label goal-<slug> --label phase-<active>
-bd update <id> --claim
-# → pi-flow.worker (one task, self-contained brief)
-# → verify (inline or pi-flow.reviewer if >500 token evidence)
-bd update <id> --close
+```text
+paperflow_beads({ action: "ready" })
+# → pi-flow.bd-keeper: bd update --claim
+# → pi-flow.worker (one task)
+# → pi-flow.bd-keeper: bd update --close
 ```
 
 ## Rules

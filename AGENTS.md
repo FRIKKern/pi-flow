@@ -17,7 +17,7 @@ Terminal surface [Pi]  +  Browser surface [:8767/paperflow/]  +  Dock feeds
 
 **Session start:** `pi-flow-host` registers with paperflow-daemon so grill **Submit** → `cmux send` → Pi pane.
 
-**Tools:** `paperflow_verify` · `paperflow_cmux` · `paperflow_active_goal`
+**Tools:** `paperflow_host` · `paperflow_verify` · `paperflow_cmux` · `paperflow_beads` · `paperflow_active_goal`
 
 **Outside cmux:** degraded mode (chat grill, SKIP verify) — still works, not target experience.
 

@@ -1,59 +1,36 @@
 # pi-flow extensions
 
-pi-flow uses Pi’s [extension API](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/extensions.md) for **integration and guardrails**. Lifecycle playbooks stay in **skills**.
+## Architecture
 
-## Two extensions
+```text
+pi-flow-setup     settings, agents, /pi-flow-setup, live doctor
+pi-flow-host      tools, session register, cmux skills, goal injection
+extensions/shared paperflow-client, host-manager, beads, doctor
+```
 
-| Extension | Role |
-|-----------|------|
-| **`pi-flow-setup`** | `/pi-flow-setup`, `/pi-flow-doctor`, `/pi-flow-cmux-layout`, agent install, settings merge |
-| **`pi-flow-host`** | paperflow tools, session register, cmux skill discovery, active-goal injection |
+Bundled: `pi-subagents`, `pi-mcp-adapter`, optional `pi-cursor-provider`.
 
-Bundled third-party extensions (unchanged):
+## Tools
 
-- `pi-subagents` — delegation
-- `pi-mcp-adapter` — MCP panel
-- `pi-cursor-provider` — optional Cursor models
-
-## Tools (LLM-callable)
-
-| Tool | Description |
-|------|-------------|
-| `paperflow_verify` | Wraps `paperflow-doc-verify` → `PASS\|WARN\|FAIL\|SKIP` line |
-| `paperflow_cmux` | `detect` workspace or `open` URL in cmux browser |
-| `paperflow_active_goal` | Read `.paperflow/active-goal` and `active-phase` |
-
-All tools **fail open** when the host or cmux is missing (SKIP / error text, never block Pi startup).
+| Tool | Wraps / behavior |
+|------|------------------|
+| `paperflow_host` | External daemon — `status` \| `ensure` ([HOST.md](./HOST.md)) |
+| `paperflow_verify` | `paperflow-doc-verify` |
+| `paperflow_cmux` | detect \| browser open |
+| `paperflow_active_goal` | `.paperflow/active-*` |
+| `paperflow_beads` | `bd ready` \| `show` \| `init` — mutations → bd-keeper |
 
 ## Events
 
-| Event | Handler |
-|-------|---------|
-| `session_start` (host) | `POST /sessions/register` for grill bridge; cmux notify |
-| `resources_discover` (host) | Adds `skills-cmux/` when cmux detected |
-| `before_agent_start` (host) | Injects active goal/phase when pointers exist |
+| Event | Extension |
+|-------|-----------|
+| `session_start` | setup: agents · host: register + host check |
+| `resources_discover` | host: `skills-cmux/` when cmux |
+| `before_agent_start` | host: active goal snippet |
+| `appendEntry` | host: `pi-flow-workflow` restore |
 
-## Agents
+## Not in extensions
 
-pi-subagents reads:
+Lifecycle prose → skills. HTML → doc-writer. bd mutations → bd-keeper. Daemon code → paperflow host.
 
-- `.pi/agents/pi-flow/*.md` (symlinks on `/pi-flow-setup`)
-- `~/.pi/agent/agents/pi-flow.*.md` (global copy fallback)
-
-Agents use `package: pi-flow` in frontmatter → `pi-flow.doc-writer`, etc.
-
-## What we deliberately do not extension-ize
-
-- goal → plan → grill → build workflow (skills)
-- HTML authoring (doc-writer agent)
-- Beads mutations (bd-keeper agent)
-- paperflow daemon / auto-open / grill.js (paperflow host)
-
-## Development
-
-```bash
-pi -e /path/to/pi-flow
-/reload   # after editing extension TS
-```
-
-Extensions load via jiti — no compile step required.
+See [BEST-PRACTICES.md](./BEST-PRACTICES.md).
