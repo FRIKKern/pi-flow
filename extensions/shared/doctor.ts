@@ -5,6 +5,11 @@ import { checkPaperflowHost } from "./host-manager.ts";
 import { cmuxDetectJson, isInCmux } from "./paperflow-client.ts";
 import { PAPERFLOW_BIN } from "./paths.ts";
 import { commandExists, runCommand } from "./exec.ts";
+import {
+	checkBrowserbaseCloud,
+	checkBrowserbaseMcpConfig,
+	checkBrowseCli,
+} from "./browserbase.ts";
 import { loadStreamedRules } from "./streamed-rules.ts";
 
 export interface DoctorCheck {
@@ -39,6 +44,9 @@ export async function runPiFlowDoctor(
 	checks.push(await checkCommand("jq", ["--version"], "jq"));
 	checks.push(checkBundled(packageRoot, "pi-subagents"));
 	checks.push(checkBundled(packageRoot, "pi-mcp-adapter"));
+	checks.push(await checkBrowseCli());
+	checks.push(checkBrowserbaseMcpConfig());
+	checks.push(await checkBrowserbaseCloud());
 	checks.push(optionalBundled(packageRoot, "pi-cursor-provider"));
 
 	const host = await checkPaperflowHost();
@@ -126,7 +134,8 @@ export function formatDoctorReport(checks: DoctorCheck[]): string {
 	lines.push(
 		"",
 		"Full dashboard: /pi-flow-status",
-		"Tools: paperflow_host · paperflow_verify · paperflow_beads · paperflow_cmux · paperflow_active_goal",
+		"Tools: paperflow_* · Browserbase: mcp({ server: \"browserbase\" }) · browse CLI",
+		"Browser: docs/BROWSERBASE.md · lib/browser-routing.md",
 		"Docs: docs/BEST-PRACTICES.md · docs/HOST.md · docs/EDITING.md",
 	);
 	return lines.join("\n");

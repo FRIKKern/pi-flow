@@ -1,5 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { ensureBrowseCli } from "./browserbase.ts";
 import { commandExists, runCommand } from "./exec.ts";
 import { resolvePackageRoot } from "./package-root.ts";
 
@@ -47,6 +48,7 @@ export async function ensurePiFlowDeps(
 
 	results.push(await ensureBd(packageRoot, options.installGlobalBd !== false));
 	results.push(await ensureJq());
+	results.push(await ensureBrowse());
 	results.push(checkGit());
 
 	if (options.initBeads !== false) {
@@ -149,6 +151,15 @@ async function ensureJq(): Promise<DepInstallResult> {
 		name: "jq",
 		status: "failed",
 		detail: "required for paperflow host — brew install jq",
+	};
+}
+
+async function ensureBrowse(): Promise<DepInstallResult> {
+	const result = await ensureBrowseCli();
+	return {
+		name: "browserbase CLI (browse)",
+		status: result.ok ? (result.detail.includes("installed") ? "installed" : "present") : "failed",
+		detail: result.detail,
 	};
 }
 

@@ -84,6 +84,8 @@ Plans and grills open automatically. Click **Submit** on a grill to send answers
 | `autopilot` | Chain the above |
 | `resume` | Switch active Goal |
 | `pi-flow` | Router — “what should I run?” |
+| `browserbase` | Cloud browser (MCP + browse CLI) for external web |
+| `cmux-browser` | paperflow HTML on `:8767` (when cmux detected) |
 
 ### Agents
 
@@ -97,6 +99,8 @@ We do **not** ship ten duplicate roles — see [lib/orchestrator.md](./lib/orche
 ### Pi tools
 
 `paperflow_host` · `paperflow_verify` · `paperflow_beads` · `paperflow_cmux` · `paperflow_active_goal`
+
+**Browser:** [cmux](./docs/CMUX.md) for paperflow docs · [Browserbase](./docs/BROWSERBASE.md) for external sites (`mcp({ server: "browserbase" })`)
 
 ### Bundled
 
@@ -130,6 +134,7 @@ We do **not** ship ten duplicate roles — see [lib/orchestrator.md](./lib/orche
 | `/pi-flow-doctor` | Live health check |
 | `/pi-flow-install-deps` | beads + jq only |
 | `/pi-flow-cmux-layout` | cmux workspace recipe |
+| `/pi-flow-browserbase-setup` | browse CLI + Browserbase MCP config |
 
 ---
 

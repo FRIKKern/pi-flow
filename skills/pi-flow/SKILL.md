@@ -21,6 +21,8 @@ Read `lib/orchestrator.md` for dispatch rules. **Lazy load:** read each skill's 
 | First time / broken install | `/pi-flow-setup` then `/pi-flow-status` |
 | Long session / context full | `/pi-flow-handoff [focus]` |
 | Update pi-flow | `/pi-flow-update` |
+| Browserbase / cloud browser | `/pi-flow-browserbase-setup` · `/skill:browserbase` |
+| paperflow HTML in cmux | `/skill:cmux-browser` |
 
 ## Lifecycle
 

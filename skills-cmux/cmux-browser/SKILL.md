@@ -53,3 +53,7 @@ With paperflow host: **Submit** in HTML — bridge sends to Pi. Do not reimpleme
 - `browser open` uses caller workspace (`CMUX_WORKSPACE_ID`)
 
 See `docs/CMUX.md`.
+
+## External sites
+
+For URLs **outside** `localhost:8767/paperflow/`, use **`/skill:browserbase`** (Browserbase MCP + `browse` CLI), not cmux WKWebView.

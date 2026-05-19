@@ -15,6 +15,14 @@ import {
 	loadMergedPiSettings,
 } from "../shared/settings-loader.ts";
 import { formatPiFlowStatus } from "../shared/status.ts";
+import {
+	BROWSERBASE_ENV_FILE,
+	browserbaseEnvConfigured,
+	checkBrowserbaseCloud,
+	ensureBrowseCli,
+	loadBrowserbaseEnvFile,
+} from "../shared/browserbase.ts";
+import { applyBrowserbaseMcp } from "../shared/mcp-browserbase.ts";
 import { updatePiFlowPackage } from "../shared/update-package.ts";
 import { applyPiFlowSettings } from "./apply-settings.ts";
 import { installPiFlowAgents } from "./install-agents.ts";
@@ -61,6 +69,7 @@ function installAgents(ctx: ExtensionContext, cwd = process.cwd()): void {
 
 export default function piFlowSetup(pi: ExtensionAPI): void {
 	pi.on("session_start", async (_event, ctx) => {
+		loadBrowserbaseEnvFile();
 		try {
 			installAgents(ctx);
 		} catch (error) {
@@ -96,6 +105,7 @@ export default function piFlowSetup(pi: ExtensionAPI): void {
 						"",
 						"Start: /skill:autopilot \"…\"  or  /skill:goal",
 						"Status: /pi-flow-status · Doctor: /pi-flow-doctor",
+						"Browserbase: /pi-flow-browserbase-setup",
 						"Handoff: /pi-flow-handoff [focus]",
 						"",
 						"Docs: README.md · docs/BEST-PRACTICES.md",
@@ -139,6 +149,7 @@ export default function piFlowSetup(pi: ExtensionAPI): void {
 					"pi-flow-host",
 					"pi-mcp-adapter",
 					"pi-subagents",
+					"browserbase MCP (hosted)",
 					"pi-cursor-provider (optional)",
 				],
 			});
@@ -193,6 +204,50 @@ export default function piFlowSetup(pi: ExtensionAPI): void {
 					"warning",
 				);
 			}
+		},
+	});
+
+	pi.registerCommand("pi-flow-browserbase-setup", {
+		description:
+			"Install browse CLI, merge Browserbase MCP config, verify cloud API (optional stdio mode)",
+		handler: async (args, ctx) => {
+			const mode = args.trim().toLowerCase() === "stdio" ? "stdio" : "hosted";
+			loadBrowserbaseEnvFile();
+
+			const browse = await ensureBrowseCli();
+			const mcp = applyBrowserbaseMcp({ mode, packageRoot, force: mode === "stdio" });
+
+			let cloudLine = "Cloud: skipped (set BROWSERBASE_API_KEY to verify)";
+			if (browserbaseEnvConfigured() && browse.ok) {
+				const list = await checkBrowserbaseCloud();
+				cloudLine = `Cloud: ${list.status} — ${list.detail}`;
+			}
+
+			ctx.ui.notify(
+				[
+					"pi-flow Browserbase setup",
+					"",
+					`CLI (browse): ${browse.ok ? browse.detail : browse.detail}`,
+					`MCP: ${mcp.detail}`,
+					cloudLine,
+					"",
+					"Credentials (never commit keys):",
+					`  export BROWSERBASE_API_KEY=…  # browserbase.com/settings`,
+					`  export BROWSERBASE_PROJECT_ID=…  # optional for stdio MCP`,
+					`  Or file: ${BROWSERBASE_ENV_FILE}`,
+					"",
+					"Pi tools: mcp({ server: \"browserbase\" }) then start · navigate · act · observe · extract",
+					"Verify: browse cloud sessions list",
+					"Docs: docs/BROWSERBASE.md · /skill:browserbase",
+					"",
+					mode === "hosted"
+						? "Stdio MCP (self-hosted): /pi-flow-browserbase-setup stdio"
+						: "Hosted MCP (default): /pi-flow-browserbase-setup",
+					"",
+					"/reload to refresh MCP tool cache",
+				].join("\n"),
+				browse.ok && mcp.merged ? "info" : "warning",
+			);
 		},
 	});
 

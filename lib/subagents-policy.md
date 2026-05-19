@@ -12,7 +12,7 @@
 | Subagent | Use when | MCP | May write files |
 |----------|----------|-----|-----------------|
 | `scout` | Repo map, find symbols | Read tools | No |
-| `researcher` | External docs, APIs, web | Yes | No |
+| `researcher` | External docs, APIs, web (Browserbase MCP) | Yes | No |
 | `planner` | Implementation plan from approved spec | Optional | No (plan text only) |
 | `worker` | Single work-task implementation | Optional | Yes (scoped) |
 | `reviewer` | Evidence review, ship gate | Read | No |

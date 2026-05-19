@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "browserbase": {
+      "type": "http",
+      "url": "https://mcp.browserbase.com/mcp",
+      "lifecycle": "lazy",
+      "idleTimeout": 10
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
+import { applyBrowserbaseMcp } from "../shared/mcp-browserbase.ts";
 import { resolvePackageRoot } from "../shared/package-root.ts";
 
 const packageRoot = resolvePackageRoot(import.meta.url);
@@ -52,6 +53,13 @@ export function applyPiFlowSettings(
 		(PI_FLOW_DEFAULTS.packages as string[]) ?? ["pi-flow"],
 	);
 	fs.writeFileSync(settingsPath, `${JSON.stringify(merged, null, 2)}\n`, "utf8");
+
+	// Non-fatal: add Browserbase MCP if missing (hosted SHTTP)
+	try {
+		applyBrowserbaseMcp({ packageRoot, mode: "hosted" });
+	} catch {
+		// ignore
+	}
 
 	return { path: settingsPath, merged: true, created };
 }

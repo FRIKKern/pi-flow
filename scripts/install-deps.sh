@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# pi-flow dependency installer — beads (bd), jq, optional cmux hint
+# pi-flow dependency installer — beads (bd), jq, browse (Browserbase), optional cmux hint
 # Used by quickstart.sh and documented for manual re-runs.
 set -euo pipefail
 
@@ -37,6 +37,20 @@ install_bd() {
   return 1
 }
 
+install_browse() {
+  if command -v browse >/dev/null 2>&1; then
+    ok "browse: $(browse --version 2>/dev/null | head -1 || echo present)"
+    return 0
+  fi
+  info "Installing Browserbase CLI (browse) via npm…"
+  if npm install -g browse; then
+    ok "browse installed globally"
+    return 0
+  fi
+  warn "browse install failed — run: npm install -g browse"
+  return 1
+}
+
 install_jq() {
   if command -v jq >/dev/null 2>&1; then
     ok "jq: $(jq --version 2>/dev/null | head -1)"
@@ -68,6 +82,7 @@ main() {
   need_node
   install_bd || true
   install_jq || true
+  install_browse || true
 
   if command -v git >/dev/null 2>&1; then ok "git: ok"; else warn "git not found"; fi
 

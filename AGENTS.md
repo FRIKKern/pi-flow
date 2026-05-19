@@ -30,6 +30,8 @@ Or `/skill:autopilot "vision"`. Router: `/skill:pi-flow` · policy: `lib/orchest
 
 `paperflow_host` · `paperflow_verify` · `paperflow_beads` · `paperflow_cmux` · `paperflow_active_goal`
 
+**Browser:** cmux → `:8767` paperflow · Browserbase MCP → external web (`/skill:browserbase`)
+
 ## Install / update
 
 ```bash
@@ -41,4 +43,4 @@ In Pi: `/pi-flow-setup` · `/pi-flow-status` · `/pi-flow-handoff` · `/pi-flow-
 
 ## Docs
 
-`docs/CMUX.md` · `docs/BEST-PRACTICES.md` · `docs/EDITING.md` · `docs/BEADS.md` · `docs/HOST.md`
+`docs/CMUX.md` · `docs/BROWSERBASE.md` · `docs/BEST-PRACTICES.md` · `docs/EDITING.md` · `docs/BEADS.md` · `docs/HOST.md`

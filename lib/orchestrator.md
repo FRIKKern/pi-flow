@@ -48,7 +48,9 @@ Default isolation: `subagents.isolation.mode: worktree` in pi-flow settings (pi-
 | Plan critique before build | `oracle` (subagent) |
 | Implementation plan from context | `planner` (subagent) |
 | Codebase recon | `scout` (subagent) |
-| External docs / web | `researcher` (subagent, MCP) |
+| External docs / web | `researcher` (subagent, Browserbase MCP) |
+| Public web app / SPA / login flow | Browserbase MCP — `/skill:browserbase` |
+| paperflow HTML on :8767 | `paperflow_verify` / cmux — `/skill:cmux-browser` |
 
 ## Thresholds
 

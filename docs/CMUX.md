@@ -142,7 +142,7 @@ cmux browser "$HANDLE" fill e3 "answer text" --snapshot-after
 cmux browser "$HANDLE" click e9   # Submit — prefer native grill.js when host installed
 ```
 
-**WKWebView limits:** no viewport emulation, network mocking, or Playwright trace — use `mcp:chrome-devtools` from Pi for heavy web QA if needed.
+**WKWebView limits:** no viewport emulation, network mocking, or Playwright trace — use **Browserbase MCP** (`/skill:browserbase`) or `chrome-devtools` MCP for heavy external web QA.
 
 ## Orchestrator command cheat sheet
 
