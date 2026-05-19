@@ -7,11 +7,12 @@
 | `paperflow_verify` | After doc-writer |
 | `paperflow_beads` `ready` | Build loop |
 | `paperflow_beads` `sync_todo` | Snapshot bd ready into session (Beads ↔ session sync) |
+| `paperflow_dispatch` | Inject skill/command into boss Pi (grill bridge) |
 | `paperflow_cmux` `detect` | Debug layout |
 | `paperflow_browse` `install` | Install browse CLI into ~/.pi/agent (from Pi) |
 | `paperflow_browse` `version` / `cloud_projects` / `sessions_list` | Run browse CLI |
 
-**Commands:** `/pi-flow-status` · `/pi-flow-handoff` · `/pi-flow-doctor` · `/pi-flow-browserbase-setup`
+**Commands:** `/pi-flow-dispatch` · `/pi-flow-status` · `/pi-flow-handoff` · `/pi-flow-doctor` · `/pi-flow-browserbase-setup`
 
 **Browser (external web):** Browserbase MCP — `mcp({ server: "browserbase" })` · `/skill:browserbase` · `docs/BROWSERBASE.md`
 

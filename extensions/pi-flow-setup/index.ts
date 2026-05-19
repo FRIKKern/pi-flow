@@ -224,6 +224,28 @@ export default function piFlowSetup(pi: ExtensionAPI): void {
 		},
 	});
 
+	pi.registerCommand("pi-flow-dispatch", {
+		description: "Send a line to the boss Pi session in this cmux workspace (grill bridge)",
+		handler: async (args, ctx) => {
+			const message = args.trim();
+			if (!message) {
+				ctx.ui.notify("Usage: /pi-flow-dispatch /skill:review", "warning");
+				return;
+			}
+			const { dispatchToBossSession } = await import("../shared/paperflow-dispatch.ts");
+			const result = await dispatchToBossSession({
+				message,
+				workspace: process.env.CMUX_WORKSPACE_ID ?? null,
+			});
+			ctx.ui.notify(
+				result.ok
+					? `dispatched → ${result.session_id} (${result.result})`
+					: `dispatch failed: ${result.reason}`,
+				result.ok ? "info" : "error",
+			);
+		},
+	});
+
 	pi.registerCommand("pi-flow-browserbase-setup", {
 		description:
 			"Install browse CLI, merge Browserbase MCP config, verify cloud API (optional: stdio)",

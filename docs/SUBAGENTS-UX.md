@@ -41,6 +41,17 @@ pi-flow's goal is to be the **best subagent tool**: the **boss** session orchest
 
 While following a subagent, the status line shows `follow:researcher` (extension `pi-flow-subagents`). The widget lists active runs.
 
+## Driving the boss from outside Pi
+
+Cursor and shell cannot call `subagent()`. Use the **grill bridge** into the live boss pane:
+
+```bash
+scripts/pi-flow-dispatch.sh "/skill:review"
+# or in Pi: paperflow_dispatch({ message: "/skill:review" })
+```
+
+See [BOSS-DISPATCH.md](./BOSS-DISPATCH.md). Then `/pf-follow reviewer` in cmux.
+
 ## cmux boss layout (`pif`)
 
 ```bash

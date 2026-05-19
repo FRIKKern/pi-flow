@@ -24,6 +24,7 @@ import {
 	cmuxDetectJson,
 	isInCmux,
 } from "../shared/paperflow-client.ts";
+import { dispatchToBossSession } from "../shared/paperflow-dispatch.ts";
 import {
 	ensureBrowseCli,
 	loadBrowserbaseEnvFile,
@@ -198,6 +199,31 @@ export default function piFlowHost(pi: ExtensionAPI): void {
 			return {
 				content: [{ type: "text", text: line }],
 				details: { verdict },
+			};
+		},
+	});
+
+	pi.registerTool({
+		name: "paperflow_dispatch",
+		label: "Dispatch to boss Pi",
+		description:
+			"Send a message to the registered boss Pi session via cmux send (grill bridge). Does not spawn a workspace.",
+		parameters: Type.Object({
+			message: Type.String(),
+			workspace: Type.Optional(Type.String()),
+			session_id: Type.Optional(Type.String()),
+		}),
+		async execute(_id, params) {
+			const result = await dispatchToBossSession({
+				message: params.message,
+				workspace: params.workspace ?? process.env.CMUX_WORKSPACE_ID ?? null,
+				sessionId: params.session_id ?? null,
+			});
+			const text = JSON.stringify(result, null, 2);
+			return {
+				content: [{ type: "text", text }],
+				isError: !result.ok,
+				details: result,
 			};
 		},
 	});

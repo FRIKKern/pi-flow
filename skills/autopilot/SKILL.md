@@ -16,6 +16,8 @@ Thin chain — each step is the matching `/skill:*`. Orchestrator: `lib/orchestr
 
 **Boss Pi only** — dispatch `subagent()` for plan/build/review work. Do **not** spawn a new cmux workspace mid-chain (`cmux-layout.sh` attach mode opens the browser in the *current* workspace). `/pf-follow <agent>` to watch children.
 
+**External drivers (Cursor, shell):** `scripts/pi-flow-dispatch.sh "/skill:review"` or `paperflow_dispatch({ message: "…" })` — see `docs/BOSS-DISPATCH.md`.
+
 ## Chain
 
 ```text
