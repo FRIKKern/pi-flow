@@ -69,7 +69,14 @@
       "defaultCount": 20,
       "defaultConcurrency": 4,
       "maxCount": 128,
-      "defaultAgent": "researcher"
+      "defaultAgent": "researcher",
+      "recovery": {
+        "enabled": true,
+        "maxRetriesPerSlot": 2,
+        "cooldownMs": 15000,
+        "retryOnFailure": true,
+        "retryOnStall": true
+      }
     }
   },
   "subagents": {

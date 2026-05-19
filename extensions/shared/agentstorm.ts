@@ -97,6 +97,8 @@ export interface AgentstormTaskSpec {
 export interface AgentstormSubagentPayload {
 	tasks: AgentstormTaskSpec[];
 	concurrency: number;
+	/** Never abort the whole storm when one slot fails. */
+	failFast?: boolean;
 	/** Relative dir under cwd where slot outputs are written. */
 	stormDir?: string;
 }
@@ -143,6 +145,7 @@ export function buildAgentstormPayload(
 	return {
 		tasks,
 		concurrency,
+		failFast: false,
 		stormDir: path.relative(cwd, stormDir),
 	};
 }
@@ -170,6 +173,7 @@ export function agentstormBossInstruction(
 		`Then enable watch: \`/pf-watch\` and tell the user \`/pf-agents\` · \`/pf-follow ${parsed.agent}\`.`,
 		`Keep \`concurrency\`: ${payload.concurrency} as in the payload (do not raise concurrency above ${payload.concurrency}).`,
 		`Do not collapse to a single \`count\` task — use the explicit per-slot \`tasks\` array from the payload.`,
+		`Keep \`failFast: false\` so one slot failure does not kill the storm (pi-flow auto-retries failed slots).`,
 	];
 	if (!parsed.task) {
 		lines2.splice(

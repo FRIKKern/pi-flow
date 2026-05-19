@@ -39,6 +39,11 @@ import {
 	getAgentstormConfig,
 	parseAgentstormArgs,
 } from "../shared/agentstorm.ts";
+import {
+	loadStormRecoveryConfig,
+	StormRecoveryController,
+	SUBAGENT_CONTROL_EVENT,
+} from "../shared/storm-recovery.ts";
 
 const STATUS_KEY = "pi-flow-sub";
 const WIDGET_KEY = "pi-flow-subagents";
@@ -52,6 +57,7 @@ interface AsyncStartedPayload {
 	agent?: string;
 	agents?: string[];
 	task?: string;
+	asyncDir?: string;
 }
 
 interface AsyncCompletePayload {
@@ -77,6 +83,7 @@ function fsExists(filePath: string): boolean {
 }
 
 export default function piFlowSubagents(pi: ExtensionAPI): void {
+	const stormRecovery = new StormRecoveryController(loadStormRecoveryConfig());
 	let roster: SubagentRosterState = createRosterState(null);
 	let bossCtx: ExtensionContext | null = null;
 	let commandCtx: CommandCtx | null = null;
@@ -312,6 +319,7 @@ export default function piFlowSubagents(pi: ExtensionAPI): void {
 
 	pi.on("tool_execution_start", (event, ctx) => {
 		if (event.toolName !== "subagent") return;
+		stormRecovery.captureStormDispatch(event.args, event.toolCallId);
 		const args = event.args as {
 			agent?: string;
 			tasks?: Array<{ agent?: string; task?: string }>;
@@ -375,6 +383,7 @@ export default function piFlowSubagents(pi: ExtensionAPI): void {
 		const ctx = bossCtx;
 		if (!ctx) return;
 		const id = payload.id ?? `async-${Date.now()}`;
+		if (payload.id) stormRecovery.onAsyncStarted(ctx.cwd, payload.id, payload.asyncDir);
 		const agents = payload.agents?.length
 			? payload.agents
 			: payload.agent
@@ -401,6 +410,7 @@ export default function piFlowSubagents(pi: ExtensionAPI): void {
 		if (!ctx) return;
 		const id = payload.id;
 		if (!id) return;
+		stormRecovery.onAsyncComplete(pi, ctx, id);
 		for (const run of roster.runs) {
 			if (run.runId === id || run.id.startsWith(`${id}:`)) {
 				if (run.status === "running") run.status = "completed";
@@ -413,6 +423,24 @@ export default function piFlowSubagents(pi: ExtensionAPI): void {
 		if (roster.viewing === "follow" && roster.followRunId?.startsWith(`${id}:`) && commandCtx) {
 			void returnToBoss(commandCtx);
 		}
+	});
+
+	pi.events.on(SUBAGENT_CONTROL_EVENT, (event: unknown) => {
+		const ctx = bossCtx;
+		if (!ctx) return;
+		stormRecovery.onControlEvent(
+			pi,
+			ctx,
+			event as {
+				type?: string;
+				reason?: string;
+				runId?: string;
+				agent?: string;
+				index?: number;
+				message?: string;
+				recentFailureSummary?: string;
+			},
+		);
 	});
 
 	pi.registerCommand("pf-stack", {

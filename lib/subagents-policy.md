@@ -41,6 +41,8 @@ Invoke: `/pf-storm [count] [agent] <task>` or `/skill:agentstorm`. Pass `count` 
 
 **Child sessions:** `pi-flow-statusline` and `pi-flow-progress` are disabled when `PI_SUBAGENT_CHILD=1` so deferred UI timers cannot crash parallel researchers after session fork.
 
+**Recovery:** `piFlow.agentstorm.recovery` (defaults on) re-dispatches failed slots after `completion_guard` / run end — up to `maxRetriesPerSlot` (default 2), `failFast: false`, per-slot outputs under `.pi-flow/browserstorm/`.
+
 Subagent `config.json` should set `control.needsAttentionAfterMs`: **180000** (3 min) — merged by `/pi-flow-setup` — to avoid idle alerts during long browser sessions.
 
 ## pi-flow-only agents

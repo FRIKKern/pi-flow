@@ -21,6 +21,8 @@ argument-hint: "[count] [agent] task…"
 
 After changing settings, run `/pi-flow-setup` (merges pi-subagents `parallel.maxTasks` / `concurrency` and `needsAttentionAfterMs`) and restart Pi.
 
+**Recovery:** failed storm slots auto-retry (default 2×) via `piFlow.agentstorm.recovery` — boss gets a follow-up `subagent()` with only failed slots. `failFast: false` on every storm.
+
 ## Quick invoke
 
 ```text
