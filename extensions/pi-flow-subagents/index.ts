@@ -483,7 +483,7 @@ export default function piFlowSubagents(pi: ExtensionAPI): void {
 		},
 	});
 
-	pi.registerShortcut(Key.ctrlAlt("]"), {
+	pi.registerShortcut(Key.ctrlShift("]"), {
 		description: "Next agent in stack",
 		handler: async (ctx) => {
 			if (!commandCtx) {
@@ -494,7 +494,7 @@ export default function piFlowSubagents(pi: ExtensionAPI): void {
 		},
 	});
 
-	pi.registerShortcut(Key.ctrlAlt("["), {
+	pi.registerShortcut(Key.ctrlShift("["), {
 		description: "Previous agent in stack",
 		handler: async (ctx) => {
 			if (!commandCtx) {
