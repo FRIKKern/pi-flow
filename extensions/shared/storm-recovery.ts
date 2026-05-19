@@ -284,10 +284,18 @@ export class StormRecoveryController {
 	}
 
 	onAsyncStarted(cwd: string, runId: string, asyncDir?: string): void {
-		if (!this.config.enabled || !this.pendingStorm) return;
-		registerStormRun(cwd, runId, this.pendingStorm, asyncDir);
-		this.pendingStorm = null;
-		this.pendingToolCallId = null;
+		if (!this.config.enabled) return;
+		if (this.pendingStorm) {
+			registerStormRun(cwd, runId, this.pendingStorm, asyncDir);
+			this.pendingStorm = null;
+			this.pendingToolCallId = null;
+			return;
+		}
+		const existing = loadStormRun(cwd, runId);
+		if (existing && asyncDir) {
+			existing.asyncDir = asyncDir;
+			saveStormRun(cwd, existing);
+		}
 	}
 
 	onControlEvent(
