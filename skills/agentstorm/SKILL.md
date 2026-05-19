@@ -37,23 +37,15 @@ After changing settings, run `/pi-flow-setup` (merges pi-subagents `parallel.max
 
 ## Boss tool call (manual)
 
-When the user says **agentstorm** without a number, use **20** slots unless they gave another count:
+When the user says **agentstorm** without a number, use **20** slots unless they gave another count.
+
+**Always** use `/pf-storm …` or `buildAgentstormPayload()` — it emits **one task per slot** with unique `output` under `.pi-flow/browserstorm/<stamp>/slot-NN.md`. Never use a single `count: 20` task with the builtin `researcher` agent (that collides on `research.md` and `progress.md`).
 
 ```text
-subagent({
-  tasks: [
-    {
-      agent: "researcher",
-      count: 20,
-      task: "Agentstorm: <orchestrator brief — each slot takes a distinct slice>",
-      progress: true
-    }
-  ],
-  concurrency: 4
-})
+/pf-storm 20 researcher Map docs.browserbase.com — one URL per slot
 ```
 
-User asked for **N** agents → set `count`: **N** and `concurrency`: **4** (or `piFlow.agentstorm.defaultConcurrency`). Do **not** run 8×3 parallel waves unless they explicitly asked for concurrency 8.
+User asked for **N** agents → **N explicit tasks**, `concurrency`: **4** (or `piFlow.agentstorm.defaultConcurrency`). Do **not** run 8×3 parallel waves unless they explicitly asked for concurrency 8.
 
 ## Multi-agent storm
 

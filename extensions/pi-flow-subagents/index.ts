@@ -497,7 +497,7 @@ export default function piFlowSubagents(pi: ExtensionAPI): void {
 				);
 				return;
 			}
-			const payload = buildAgentstormPayload(parsed, config);
+			const payload = buildAgentstormPayload(parsed, config, { cwd: ctx.cwd });
 			roster.autoFollow = true;
 			saveRoster(ctx.cwd, roster);
 			refreshWidget(ctx);

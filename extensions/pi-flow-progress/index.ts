@@ -1,4 +1,5 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { isPiSubagentChildSession, safeExtensionUi } from "../shared/extension-context.ts";
 import { loadMergedPiSettings } from "../shared/settings-loader.ts";
 import {
 	assistantMessagesHaveText,
@@ -22,6 +23,9 @@ import {
 const STATUS_KEY = "pi-flow:activity";
 
 export default function piFlowProgress(pi: ExtensionAPI): void {
+	// Rescue + activity timers are boss-only; child sessions must not touch stale ctx.ui.
+	if (isPiSubagentChildSession()) return;
+
 	const settings = loadMergedPiSettings();
 	const config = loadProgressGuardConfig(settings);
 	const rescueConfig = loadRescueConfig(settings);
@@ -50,8 +54,10 @@ export default function piFlowProgress(pi: ExtensionAPI): void {
 		const snap = liveSnapshot(ctx);
 		const { alive } = assessLiveness(snap, config);
 		const enriched = { ...snap, liveness: alive ? ("alive" as const) : snap.liveness };
-		ctx.ui.setWorkingMessage(formatWorkingLabel(enriched));
-		ctx.ui.setStatus(STATUS_KEY, formatActivityTelemetry(enriched));
+		safeExtensionUi(ctx, (ui) => {
+			ui.setWorkingMessage(formatWorkingLabel(enriched));
+			ui.setStatus(STATUS_KEY, formatActivityTelemetry(enriched));
+		});
 	}
 
 	function stopTimers(): void {

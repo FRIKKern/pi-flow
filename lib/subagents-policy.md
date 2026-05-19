@@ -37,6 +37,10 @@
 
 Invoke: `/pf-storm [count] [agent] <task>` or `/skill:agentstorm`. Pass `count` = storm size and `concurrency` = `defaultConcurrency` (4) so browse/MCP work queues instead of 8×3 parallel waves.
 
+**Never** dispatch `subagent({ tasks: [{ agent: "researcher", count: 20 }] })` — the builtin defaults to `output: research.md` and all slots collide. Use `/pf-storm` / `buildAgentstormPayload()` so each slot writes `.pi-flow/browserstorm/<stamp>/slot-NN.md` with `progress: false`.
+
+**Child sessions:** `pi-flow-statusline` and `pi-flow-progress` are disabled when `PI_SUBAGENT_CHILD=1` so deferred UI timers cannot crash parallel researchers after session fork.
+
 Subagent `config.json` should set `control.needsAttentionAfterMs`: **180000** (3 min) — merged by `/pi-flow-setup` — to avoid idle alerts during long browser sessions.
 
 ## pi-flow-only agents

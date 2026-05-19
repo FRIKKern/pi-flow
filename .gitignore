@@ -1,5 +1,6 @@
 node_modules/
 .pi/
+.pi-flow/browserstorm/
 *.tgz
 .DS_Store
 .env

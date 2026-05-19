@@ -1,3 +1,4 @@
+import * as path from "node:path";
 import { loadMergedPiSettings } from "./settings-loader.ts";
 
 export interface AgentstormConfig {
@@ -83,35 +84,66 @@ export function clampStormCount(count: number, config: AgentstormConfig): number
 	return Math.min(Math.floor(count), config.maxCount);
 }
 
-export interface AgentstormSubagentPayload {
-	tasks: Array<{
-		agent: string;
-		count: number;
-		task: string;
-		progress: boolean;
-	}>;
-	concurrency: number;
+export interface AgentstormTaskSpec {
+	agent: string;
+	/** Expands to N identical tasks when set (avoid for storms — use explicit tasks). */
+	count?: number;
+	task: string;
+	progress?: boolean;
+	/** Per-slot artifact; overrides agent default `output: research.md`. */
+	output?: string;
 }
 
-/** Build a single-task `count` expansion for subagent({ tasks, concurrency }). */
+export interface AgentstormSubagentPayload {
+	tasks: AgentstormTaskSpec[];
+	concurrency: number;
+	/** Relative dir under cwd where slot outputs are written. */
+	stormDir?: string;
+}
+
+/** Unique output dir so parallel researchers do not clobber `research.md`. */
+export function browserstormOutputDir(cwd: string, stamp = Date.now()): string {
+	return path.join(cwd, ".pi-flow", "browserstorm", String(stamp));
+}
+
+function relativeStormPath(cwd: string, stormDir: string, slot: number): string {
+	const file = `slot-${String(slot).padStart(2, "0")}.md`;
+	return path.relative(cwd, path.join(stormDir, file));
+}
+
+/** One subagent per slot with unique `output` (no shared research.md / progress.md). */
 export function buildAgentstormPayload(
 	parsed: ParsedAgentstormArgs,
 	config: AgentstormConfig = getAgentstormConfig(),
+	opts?: { cwd?: string; stormDir?: string },
 ): AgentstormSubagentPayload {
 	const { count, agent, task } = parsed;
 	const concurrency = Math.min(count, config.defaultConcurrency);
+	const cwd = opts?.cwd ?? process.cwd();
+	const stormDir = opts?.stormDir ?? browserstormOutputDir(cwd);
+	const brief = task.trim()
+		? task.trim()
+		: "divide the orchestrator brief across slots; each slot covers a distinct slice and returns concise findings.";
+
+	const tasks: AgentstormTaskSpec[] = Array.from({ length: count }, (_, i) => {
+		const slot = i + 1;
+		return {
+			agent,
+			task: [
+				`Agentstorm slot ${slot}/${count} (${agent}):`,
+				brief,
+				`Write only to your output file. Use Browserbase MCP (start → navigate → observe → extract → end) when the task needs live docs.`,
+				`Do not edit shared repo files except your output path.`,
+			].join("\n"),
+			output: relativeStormPath(cwd, stormDir, slot),
+			progress: false,
+		};
+	});
+
 	return {
-		tasks: [
-			{
-				agent,
-				count,
-				task: task.trim()
-					? `Agentstorm (${count}× ${agent}): ${task.trim()}`
-					: `Agentstorm (${count}× ${agent}): divide the orchestrator brief across slots; each slot covers a distinct slice and returns concise findings.`,
-				progress: true,
-			},
-		],
+		tasks,
 		concurrency,
+		stormDir: path.relative(cwd, stormDir),
 	};
 }
 
@@ -126,19 +158,25 @@ export function agentstormBossInstruction(
 	const call = formatAgentstormSubagentCall(payload);
 	const lines = [
 		`[pi-flow agentstorm] Dispatch **${parsed.count}** \`${parsed.agent}\` subagents (concurrency **${payload.concurrency}** — queued slots, not all at once).`,
+		payload.stormDir
+			? `Per-slot outputs under \`${payload.stormDir}/slot-NN.md\` (not shared research.md).`
+			: null,
 		`Invoke exactly one tool call (do not summarize instead):`,
+	].filter((line): line is string => line !== null);
+	const lines2 = [
 		"```text",
 		call,
 		"```",
 		`Then enable watch: \`/pf-watch\` and tell the user \`/pf-agents\` · \`/pf-follow ${parsed.agent}\`.`,
-		`Keep \`count\`: ${parsed.count} and \`concurrency\`: ${payload.concurrency} as in the payload (do not raise concurrency above ${payload.concurrency}).`,
+		`Keep \`concurrency\`: ${payload.concurrency} as in the payload (do not raise concurrency above ${payload.concurrency}).`,
+		`Do not collapse to a single \`count\` task — use the explicit per-slot \`tasks\` array from the payload.`,
 	];
 	if (!parsed.task) {
-		lines.splice(
+		lines2.splice(
 			2,
 			0,
 			"The user did not provide a task string — infer a sensible split from the active goal / last user message.",
 		);
 	}
-	return lines.join("\n");
+	return [...lines, ...lines2].join("\n");
 }
