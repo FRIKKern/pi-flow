@@ -77,8 +77,7 @@ BEFORE=$(list_ws_refs)
 "$CMUX_BIN" new-workspace \
   --name "pi-flow:${NAME}" \
   --cwd "$REPO" \
-  --command "pi" \
-  --focus true >/dev/null
+  --command "pi" >/dev/null
 
 WS=""
 for _ in 1 2 3 4 5 6 7 8 9 10; do
