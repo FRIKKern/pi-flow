@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # pi-flow quickstart — one command: Pi, beads, pi-flow, paperflow host
-set -euo pipefail
+set -eo pipefail
 
 YES="${PI_FLOW_YES:-0}"
 export PAPERFLOW_YES="$YES"
@@ -9,7 +9,20 @@ info() { printf '\033[36m→\033[0m %s\n' "$*"; }
 warn() { printf '\033[33m!\033[0m %s\n' "$*"; }
 die() { printf '\033[31m✗\033[0m %s\n' "$*" >&2; exit 1; }
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# When run via curl | bash, BASH_SOURCE[0] is unset. Detect that and fetch
+# install-deps.sh from the raw GitHub URL into a temp dir.
+RAW_BASE="${PI_FLOW_RAW_BASE:-https://raw.githubusercontent.com/FRIKKern/pi-flow/main}"
+if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
+	SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+	DEPS_SCRIPT="${SCRIPT_DIR}/install-deps.sh"
+else
+	SCRIPT_DIR=""
+	TMPDIR_PF="$(mktemp -d -t pi-flow-quickstart.XXXXXX)"
+	trap 'rm -rf "$TMPDIR_PF"' EXIT
+	DEPS_SCRIPT="${TMPDIR_PF}/install-deps.sh"
+	curl -fsSL "${RAW_BASE}/scripts/install-deps.sh" -o "$DEPS_SCRIPT" \
+		|| warn "could not download install-deps.sh"
+fi
 
 info "pi-flow quickstart"
 
@@ -19,7 +32,11 @@ fi
 
 # ── 1. System deps (beads, jq) ─────────────────────────────────────
 info "Installing dependencies (beads, jq)…"
-bash "${SCRIPT_DIR}/install-deps.sh" || warn "some deps need manual install"
+if [ -f "$DEPS_SCRIPT" ]; then
+	bash "$DEPS_SCRIPT" || warn "some deps need manual install"
+else
+	warn "install-deps.sh not available — skipping (install beads/jq manually)"
+fi
 
 # ── 2. Pi CLI ───────────────────────────────────────────────────────
 if ! command -v pi >/dev/null 2>&1; then
@@ -37,14 +54,16 @@ else
 fi
 
 # Re-run deps so bundled bd is available after npm install in pi package dir
-bash "${SCRIPT_DIR}/install-deps.sh" || true
+if [ -f "$DEPS_SCRIPT" ]; then
+	bash "$DEPS_SCRIPT" || true
+fi
 
 # ── 4. paperflow host ───────────────────────────────────────────────
 PAPERFLOW_QS="https://raw.githubusercontent.com/FRIKKern/paperflow/main/scripts/quickstart.sh"
 QS_ARGS=()
-[ "$YES" = "1" ] && QS_ARGS=(--yes)
+[ "$YES" = "1" ] && QS_ARGS+=(--yes)
 
-if curl -fsSL "$PAPERFLOW_QS" | bash -s -- "${QS_ARGS[@]}"; then
+if curl -fsSL "$PAPERFLOW_QS" | bash -s -- ${QS_ARGS[@]+"${QS_ARGS[@]}"}; then
 	info "paperflow host installed"
 else
 	warn "paperflow quickstart failed — Pi-only mode still works"
