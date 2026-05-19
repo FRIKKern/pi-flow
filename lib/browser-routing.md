@@ -39,7 +39,7 @@ Pi: `mcp({ server: "browserbase" })` · `/skill:browserbase` · `/pi-flow-browse
 | `pi-flow.cmux-verifier` | paperflow URLs only |
 | `researcher` | Browserbase MCP for external research |
 | `scout` | Repo only — no browser |
-| Parent orchestrator | Chooses surface; never skip verify on plan/grill |
+| Parent orchestrator | Chooses surface; delegates external web to <code>researcher</code> (no inline Browserbase MCP) |
 
 ## Anti-patterns
 

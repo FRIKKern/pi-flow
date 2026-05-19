@@ -68,9 +68,18 @@ curl -fsSL https://raw.githubusercontent.com/FRIKKern/pi-flow/main/scripts/cmux-
 
 (`/pi-flow-setup` is optional — quickstart already applied defaults.)
 
-**3. Browser** — right pane → `http://localhost:8767/`
+**3. Browser** — right pane → `http://localhost:8767/` (or grill URL via `cmux-layout.sh … browserbase`)
 
 Plans and grills open automatically. Click **Submit** on a grill to send answers back to Pi.
+
+**External web (Browserbase)** — after install, in Pi:
+
+```text
+/skill:browserbase
+mcp({ server: "browserbase" })
+# researcher subagent for real site research:
+# dispatch researcher: "Summarize https://docs.browserbase.com/features"
+```
 
 ---
 

@@ -14,6 +14,9 @@ pi-flow install paths must work for **everyone** on:
 | `scripts/update.sh` | Refresh package + host |
 | `scripts/install-deps.sh` | bd, jq, browse, cmux shell |
 | `scripts/install-paperflow-host.sh` | paperflow `install.sh` (not paperflow quickstart) |
+| `scripts/bootstrap-pi-flow.sh` | Post-install: Pi settings, subagents, OpenCode plugin (calls `bootstrap.mjs`) |
+| `scripts/install-opencode-integration.sh` | OpenCode plugin + `opencode.json` merge |
+| `scripts/cmux-layout.sh` | Pi left + paperflow browser right (grill URL for <code>browserbase</code> slug) |
 | `scripts/lib/bash-safe.sh` | Shared helpers + bundle download |
 
 ## Rules (required)
@@ -43,6 +46,14 @@ PI_FLOW_VERIFY=1 bash scripts/update.sh
 ```
 
 Checks that the script bundle resolves (local or downloaded).
+
+## Environment (optional)
+
+| Variable | Default | Purpose |
+|----------|---------|--------|
+| `PI_FLOW_INSTALL_OPENCODE` | `1` | Install `opencode-ai` global CLI during quickstart |
+| `PI_FLOW_OPENCODE_SERVE` | unset | Set `1` to auto-start `opencode serve` on setup |
+| `PI_FLOW_YES` | `0` | Unattended install (`1` = yes) |
 
 ## User troubleshooting
 
