@@ -6,6 +6,11 @@ import { bdEnsureRepo, bdReady, bdShow } from "../shared/beads-client.ts";
 import { PI_FLOW_STATE_TYPE } from "../shared/constants.ts";
 import { checkPaperflowHost, ensurePaperflowHost } from "../shared/host-manager.ts";
 import {
+	ensureOpenCodeIntegration,
+	shouldAutoEnsureOpenCodeServe,
+	type OpenCodeIntegrationStatus,
+} from "../shared/opencode-integration.ts";
+import {
 	evaluateToolCall,
 	loadPolicyConfig,
 	redactToolResultContent,
@@ -68,7 +73,14 @@ export default function piFlowHost(pi: ExtensionAPI): void {
 	pi.on("session_start", async (_event, ctx) => {
 		try {
 			restoreWorkflowState(pi, ctx.sessionManager);
-			await registerPiFlowSession();
+			await Promise.all([
+				ensurePaperflowHost(),
+				registerPiFlowSession(),
+				ensureOpenCodeIntegration({
+					packageRoot,
+					ensureServe: shouldAutoEnsureOpenCodeServe(),
+				}),
+			]);
 			const host = await checkPaperflowHost();
 			const cmux = await cmuxDetectJson();
 
@@ -349,6 +361,28 @@ export default function piFlowHost(pi: ExtensionAPI): void {
 				content: [{ type: "text", text: r.ok ? r.stdout : r.error }],
 				details: {},
 				isError: !r.ok,
+			};
+		},
+	});
+
+	pi.registerTool({
+		name: "paperflow_opencode",
+		label: "OpenCode + paperflow",
+		description:
+			"Auto-configure OpenCode for paperflow/cmux (plugin, hooks, optional serve). action=status|ensure.",
+		parameters: Type.Object({
+			action: Type.Union([Type.Literal("status"), Type.Literal("ensure")]),
+		}),
+		async execute(_id, params) {
+			const result: OpenCodeIntegrationStatus = await ensureOpenCodeIntegration({
+				packageRoot,
+				ensureHost: params.action === "ensure",
+				ensureServe: params.action === "ensure",
+			});
+			const text = JSON.stringify(result, null, 2);
+			return {
+				content: [{ type: "text", text }],
+				details: result,
 			};
 		},
 	});

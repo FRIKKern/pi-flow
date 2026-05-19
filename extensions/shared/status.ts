@@ -41,8 +41,9 @@ export function formatPiFlowStatus(snapshot: PiFlowStatusSnapshot): string {
 		"── extensions ──",
 		...snapshot.extensions.map((e) => `  · ${e}`),
 		"",
+		"Subagents: /pf-agents · /pf-follow · /pf-boss · /pf-watch",
 		"Commands: /pi-flow-handoff · /pi-flow-doctor · /pi-flow-update",
-		"Docs: docs/BEST-PRACTICES.md · docs/EDITING.md",
+		"Docs: docs/SUBAGENTS-UX.md · docs/BEST-PRACTICES.md",
 	);
 
 	return lines.join("\n");

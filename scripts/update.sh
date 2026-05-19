@@ -67,6 +67,11 @@ else
 	pi_flow_warn "paperflow host install skipped or failed"
 fi
 
+BOOTSTRAP="$(pi_flow_script_path bootstrap-pi-flow.sh || true)"
+if [ -n "$BOOTSTRAP" ] && [ -f "$BOOTSTRAP" ]; then
+	PI_FLOW_PKG="${HOME}/.pi/agent/git/github.com/FRIKKern/pi-flow" bash "$BOOTSTRAP" || true
+fi
+
 cat <<'EOF'
 
 ✓ Update complete

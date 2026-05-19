@@ -19,6 +19,7 @@
     }
   },
   "subagents": {
+    "orchestratorFirst": true,
     "agentOverrides": {
       "scout": { "model": "composer-2.5" },
       "researcher": { "model": "composer-2.5" },

@@ -21,6 +21,13 @@
       "oncePerSession": true
     },
     {
+      "id": "orchestrator-inline-work",
+      "pattern": "I'll (do|handle|implement|write|research|investigate).{0,30}(myself|inline|directly)",
+      "flags": "i",
+      "message": "[pi-flow] Boss delegates — use subagent({ agent: ... }). Offer /pf-follow <agent> for long runs. docs/SUBAGENTS-UX.md",
+      "oncePerSession": true
+    },
+    {
       "id": "inline-large-code",
       "pattern": "I'll (implement|write|add).{0,40}(entire|whole|all) (file|module|component)",
       "flags": "i",

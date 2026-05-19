@@ -34,6 +34,7 @@ export function buildHandoffPrompt(options: {
 		"2. `paperflow_host` ensure",
 		"3. Continue lifecycle: `/skill:plan` · `/skill:build` · `/skill:review` as appropriate",
 		"4. Read `lib/orchestrator.md` before coordinating subagents",
+		"5. Subagent UX: /pf-boss · /pf-agents · docs/SUBAGENTS-UX.md",
 		"",
 	);
 

@@ -1,6 +1,8 @@
 # pi-flow orchestrator policy
 
-Single reference for the **parent Pi session** coordinating paperflow. Skills link here; subagents do not inherit this file unless briefed.
+Single reference for the **boss (parent) Pi session** coordinating paperflow. Skills link here; subagents do not inherit this file unless briefed.
+
+**Subagent-first:** the boss **always** delegates heavy work to pi-subagents. The human can **follow** any child chat (`/pf-follow`, `/pf-agents`) and **return** with `/pf-boss`. See `docs/SUBAGENTS-UX.md`.
 
 ## The stack (less is more)
 
@@ -25,6 +27,18 @@ Configured in `settings/defaults.json` under `piFlow.modelRoles` (merged into `~
 | `review` | composer-2.5; reviewer high | Ship gate |
 
 View live hints: `/pi-flow-status`.
+
+## Boss UX (pi-flow-subagents extension)
+
+| Command | When |
+|---------|------|
+| `/pf-follow <agent>` | User (or you) wants the child’s live chat |
+| `/pf-agents` | Pick from active/recent runs |
+| `/pf-boss` | Back to orchestrator after following |
+| `/pf-watch` | Nudge on each subagent start |
+| `/pf-mirror` | Same session in cmux worker pane (`pif` layout) |
+
+Tell the user `/pf-follow researcher` (etc.) when launching long scout/research/build runs.
 
 ## Subagents + MCP (see `lib/subagents-policy.md`)
 

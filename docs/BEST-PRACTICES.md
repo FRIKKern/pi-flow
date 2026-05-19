@@ -27,6 +27,7 @@ We deliberately **do not** ship 10+ custom agents like OMC or 15 meta-skills lik
 | Unified status dashboard | `/pi-flow-status` |
 | Session handoff | `/pi-flow-handoff` |
 | Subagent isolation + MCP matrix | `lib/subagents-policy.md` · `subagents.isolation` |
+| Boss/follow/mirror UX | `docs/SUBAGENTS-UX.md` · `/pf-*` commands |
 | Beads ↔ session sync | `paperflow_beads` `sync_todo` |
 | Hashline + LSP | `docs/EDITING.md` (use OMP-capable runtime) |
 

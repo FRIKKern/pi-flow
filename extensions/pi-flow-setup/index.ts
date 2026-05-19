@@ -22,7 +22,9 @@ import {
 } from "../shared/browserbase.ts";
 import { updatePiFlowPackage } from "../shared/update-package.ts";
 import { applyPiFlowSettings } from "./apply-settings.ts";
+import { applyPiFlowSubagentConfig } from "../shared/subagent-config.ts";
 import { installPiFlowAgents } from "./install-agents.ts";
+import { ensureOpenCodeIntegration } from "../shared/opencode-integration.ts";
 
 const NAMESPACE = "pi-flow";
 const packageRoot = resolvePackageRoot(import.meta.url);
@@ -80,14 +82,17 @@ export default function piFlowSetup(pi: ExtensionAPI): void {
 			const message = error instanceof Error ? error.message : String(error);
 			ctx.ui.notify(`pi-flow: agent install failed (${message})`, "error");
 		}
+		// OpenCode config + paperflow session plugin (no-op if opencode not installed)
+		void ensureOpenCodeIntegration({ packageRoot, ensureHost: false, ensureServe: false });
 	});
 
 	pi.registerCommand("pi-flow-setup", {
-		description: "Apply settings, install agents, ensure paperflow host",
+		description: "Re-apply settings, agents, host, OpenCode (optional — quickstart already ran)",
 		handler: async (_args, ctx) => {
 			try {
 				const global = applyPiFlowSettings("global");
 				const project = applyPiFlowSettings("project", process.cwd());
+				const subCfg = applyPiFlowSubagentConfig();
 				installAgents(ctx);
 
 				const deps = await ensurePiFlowDeps({
@@ -96,6 +101,10 @@ export default function piFlowSetup(pi: ExtensionAPI): void {
 					initBeads: true,
 				});
 				const host = await ensurePaperflowHost();
+				const opencode = await ensureOpenCodeIntegration({
+					packageRoot,
+					ensureServe: true,
+				});
 				const browserbase = await runBrowserbaseSetup({ packageRoot });
 
 				ctx.ui.notify(
@@ -105,6 +114,8 @@ export default function piFlowSetup(pi: ExtensionAPI): void {
 						formatDepsReport(deps),
 						"",
 						`Settings: ${global.path}`,
+						`Subagents: ${subCfg.path}`,
+						"Follow UX: /pf-agents · /pf-follow · /pf-boss · /pf-watch",
 						`Project: ${project.path}`,
 						`Host: ${host.running ? "running" : "not running"} — ${host.detail}`,
 						"",

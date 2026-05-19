@@ -34,6 +34,7 @@ Read `lib/orchestrator.md` for dispatch rules. **Lazy load:** read each skill's 
 
 - `pi-flow.doc-writer` · `pi-flow.bd-keeper` · `pi-flow.cmux-verifier`
 - Everything else: **pi-subagents** builtins (`worker`, `reviewer`, `scout`, …)
+- Follow child chats: `/pf-agents` · `/pf-follow` · `/pf-boss` (`docs/SUBAGENTS-UX.md`)
 
 ## Tools
 

@@ -31,6 +31,8 @@ pi_flow_fetch_script_bundle() {
 		install-cmux-shell.sh
 		cmux-boss-layout.sh
 		install-paperflow-host.sh
+		install-opencode-integration.sh
+		bootstrap-pi-flow.sh
 	)
 	if [ -z "$tmp" ]; then
 		tmp="$(mktemp -d -t pi-flow-scripts.XXXXXX)"

@@ -23,6 +23,16 @@ Pi-flow **integrates** via:
 | **Pi best practice** | Ephemeral localhost servers only (see pi-web-access curator pattern), torn down on `session_shutdown` |
 | **Single port** | `:8767` must be host-scoped — multiple Pi panes share one daemon |
 
+## Auto-registration (Pi + OpenCode)
+
+On every Pi **`session_start`**, pi-flow:
+
+1. **`ensurePaperflowHost()`** — starts `:8767` if down (no manual `curl` / restart)
+2. **`registerPiFlowSession()`** — POST `/sessions/register` for grill → Pi routing
+3. **`ensureOpenCodeIntegration()`** — installs OpenCode paperflow plugin + merges `opencode.json` (when `opencode` is on PATH)
+
+OpenCode registers itself on **`session.created`** via the same daemon endpoint (`agent: opencode`). See [OPENCODE.md](./OPENCODE.md).
+
 ## What `paperflow_host ensure` does
 
 1. `GET http://localhost:8767/health`

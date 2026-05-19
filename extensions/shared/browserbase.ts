@@ -86,7 +86,9 @@ export function loadBrowserbaseEnvFile(): void {
 		) {
 			value = value.slice(1, -1);
 		}
-		if (key && process.env[key] === undefined) {
+		// Shell may export BROWSERBASE_*= (empty); file values should win over blank env.
+		const existing = key ? process.env[key] : undefined;
+		if (key && (existing === undefined || existing.trim() === "")) {
 			process.env[key] = value;
 		}
 	}

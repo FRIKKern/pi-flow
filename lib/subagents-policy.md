@@ -1,11 +1,14 @@
 # Subagent policy (oh-my-pi task-tool patterns, pi-flow scoped)
 
+**UX:** `docs/SUBAGENTS-UX.md` — boss/follow/mirror commands.
+
 ## Principles
 
 1. **MCP where digging matters** — `scout` and `researcher` get MCP/read tools; parent orchestrator delegates early.
 2. **One worker, one task** — each `worker` dispatch = one Beads work-task, self-contained brief.
 3. **Isolation by default** — parallel workers use git worktree isolation (`subagents.isolation` in pi-flow settings).
 4. **Full output** — if subagent output truncates, re-read via pi-subagents `agent://` resources (see pi-subagents docs).
+5. **Follow the work** — orchestrator tells the user `/pf-follow <agent>`; boss session stays the coordination anchor (`/pf-boss`).
 
 ## Dispatch matrix
 

@@ -26,6 +26,8 @@ Or `/skill:autopilot "vision"`. Router: `/skill:pi-flow` · policy: `lib/orchest
 | `planner` | Implementation plan |
 | `scout` · `researcher` | Recon · web/MCP |
 
+**Boss/follow:** `/pf-agents` · `/pf-follow` · `/pf-boss` — `docs/SUBAGENTS-UX.md`
+
 ## Tools
 
 `paperflow_host` · `paperflow_verify` · `paperflow_beads` · `paperflow_cmux` · `paperflow_active_goal`
@@ -43,4 +45,4 @@ In Pi: `/pi-flow-setup` · `/pi-flow-status` · `/pi-flow-handoff` · `/pi-flow-
 
 ## Docs
 
-`docs/CMUX.md` · `docs/BROWSERBASE.md` · `docs/BEST-PRACTICES.md` · `docs/EDITING.md` · `docs/BEADS.md` · `docs/HOST.md`
+`docs/SUBAGENTS-UX.md` · `docs/CMUX.md` · `docs/BROWSERBASE.md` · `docs/BEST-PRACTICES.md` · `docs/EDITING.md` · `docs/BEADS.md` · `docs/HOST.md`

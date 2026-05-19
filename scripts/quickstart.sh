@@ -72,6 +72,12 @@ else
 	pi_flow_warn "paperflow host install failed — Pi-only mode still works"
 fi
 
+BOOTSTRAP="$(pi_flow_script_path bootstrap-pi-flow.sh || true)"
+if [ -n "$BOOTSTRAP" ] && [ -f "$BOOTSTRAP" ]; then
+	pi_flow_info "Applying pi-flow defaults (settings, OpenCode, agents)…"
+	PI_FLOW_PKG="${HOME}/.pi/agent/git/github.com/FRIKKern/pi-flow" bash "$BOOTSTRAP" || pi_flow_warn "bootstrap had issues — run /pi-flow-setup in Pi"
+fi
+
 if command -v brew >/dev/null 2>&1 && ! command -v cmux >/dev/null 2>&1; then
 	pi_flow_info "Optional cmux: brew tap manaflow-ai/cmux && brew install --cask cmux"
 elif command -v cmux >/dev/null 2>&1; then
@@ -86,9 +92,7 @@ In your project repo:
   cd your-repo
   bd init
 
-In Pi:
-  /pi-flow-setup
-  /pi-flow-status
+In Pi (setup already applied — optional /pi-flow-status):
   /skill:autopilot "your vision"
 
 cmux (recommended):

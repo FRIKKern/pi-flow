@@ -16,6 +16,7 @@ import {
 	checkPfPifAliases,
 } from "./cmux-shell.ts";
 import { loadStreamedRules } from "./streamed-rules.ts";
+import { ensureOpenCodeIntegration } from "./opencode-integration.ts";
 
 export interface DoctorCheck {
 	name: string;
@@ -55,6 +56,22 @@ export async function runPiFlowDoctor(
 	checks.push(optionalBundled(packageRoot, "pi-cursor-provider"));
 
 	const host = await checkPaperflowHost();
+	const opencode = await ensureOpenCodeIntegration({
+		packageRoot,
+		ensureHost: false,
+		ensureServe: false,
+		ensureCmuxHooks: false,
+	});
+	checks.push({
+		name: "opencode + paperflow plugin",
+		status: !opencode.opencodeOnPath
+			? "skip"
+			: opencode.paperflowPluginInConfig && opencode.pluginInstalled
+				? "pass"
+				: "warn",
+			detail: opencode.detail,
+	});
+
 	checks.push({
 		name: "paperflow-daemon (:8767)",
 		status: host.running ? "pass" : "warn",

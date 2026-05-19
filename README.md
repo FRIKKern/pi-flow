@@ -14,7 +14,7 @@
 
 **pi-flow** runs the [paperflow](https://github.com/FRIKKern/paperflow) lifecycle inside [Pi](https://pi.dev/): **Goal → HTML plan → grill → build (Beads) → review** — with browser panes in [cmux](https://github.com/manaflow-ai/cmux) and grill **Submit** back to your terminal.
 
-**Simple by design:** 6 skills · **3 custom agents** · pi-subagents for everything else · one install command.
+**Simple by design:** 6 skills · **3 custom agents** · pi-subagents for everything else · **boss/follow subagent UX** · one install command.
 
 ---
 
@@ -24,7 +24,7 @@
 curl -fsSL https://raw.githubusercontent.com/FRIKKern/pi-flow/main/scripts/quickstart.sh | bash
 ```
 
-Installs **Pi**, **beads (`bd`)**, **jq**, **pi-flow**, and the **paperflow host** (`:8767`).
+One command installs **Pi**, **beads (`bd`)**, **jq**, **pi-flow**, **paperflow host** (`:8767`), **Pi settings**, and **OpenCode grill bridge** — no `/pi-flow-setup` required.
 
 Unattended:
 
@@ -63,9 +63,10 @@ curl -fsSL https://raw.githubusercontent.com/FRIKKern/pi-flow/main/scripts/cmux-
 **2. Pi** — terminal pane:
 
 ```text
-/pi-flow-setup
 /skill:autopilot "One sentence describing what you want to achieve"
 ```
+
+(`/pi-flow-setup` is optional — quickstart already applied defaults.)
 
 **3. Browser** — right pane → `http://localhost:8767/`
 
@@ -95,6 +96,7 @@ Plans and grills open automatically. Click **Submit** on a grill to send answers
 |-------|-----|
 | **pi-flow (3)** | `doc-writer` · `bd-keeper` · `cmux-verifier` |
 | **pi-subagents** | `worker` · `reviewer` · `oracle` · `planner` · `scout` · `researcher` |
+| **Follow UX** | `/pf-agents` · `/pf-follow` · `/pf-boss` · `/pf-watch` ([docs](./docs/SUBAGENTS-UX.md)) |
 
 We do **not** ship ten duplicate roles — see [lib/orchestrator.md](./lib/orchestrator.md).
 
@@ -157,6 +159,7 @@ We do **not** ship ten duplicate roles — see [lib/orchestrator.md](./lib/orche
 | Doc | Topic |
 |-----|--------|
 | [lib/orchestrator.md](./lib/orchestrator.md) | Who dispatches whom |
+| [docs/SUBAGENTS-UX.md](./docs/SUBAGENTS-UX.md) | Boss · follow · cmux mirror |
 | [docs/CMUX.md](./docs/CMUX.md) | CMUX expert guide |
 | [docs/BEADS.md](./docs/BEADS.md) | beads install |
 | [docs/HOST.md](./docs/HOST.md) | External daemon |

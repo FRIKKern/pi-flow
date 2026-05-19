@@ -1,6 +1,6 @@
 {
   "name": "pi-flow",
-  "version": "0.8.5",
+  "version": "0.9.1",
   "description": "Paperflow lifecycle in Pi (CMUX): goal → plan → grill → build → review. HTML artifacts, Beads, MCP subagents. Model-agnostic; Composer 2.5 default.",
   "type": "module",
   "license": "MIT",
@@ -21,6 +21,7 @@
   },
   "files": [
     "agents/",
+    "assets/",
     "bin/",
     "scripts/",
     "extensions/",
@@ -49,6 +50,7 @@
       "./extensions/pi-flow-setup/index.ts",
       "./extensions/pi-flow-host/index.ts",
       "./extensions/pi-flow-statusline/index.ts",
+      "./extensions/pi-flow-subagents/index.ts",
       "node_modules/pi-cursor-provider/index.ts",
       "node_modules/pi-mcp-adapter/index.ts",
       "node_modules/pi-subagents/src/extension/index.ts"

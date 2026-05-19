@@ -27,7 +27,9 @@ Installed automatically by `/pi-flow-setup` and `scripts/quickstart.sh`:
 | Alias | Command | Layout |
 |-------|---------|--------|
 | `pf` | `cmux-boss-layout` | Boss + 4 workers + browser — **Claude Code** (`cc`) |
-| `pif` | `cmux-boss-layout --pi` | Same geometry — **Pi** in all agent panes |
+| `pif` | `cmux-boss-layout --pi` | Same geometry — **Pi** in boss + worker panes |
+
+**Subagent follow:** orchestrate in the **boss** pane; `/pf-follow researcher` switches your view to the child session; `/pf-mirror` opens the same session in a worker pane. See [SUBAGENTS-UX.md](./SUBAGENTS-UX.md).
 
 ```bash
 # From any repo (after source ~/.zshrc)
