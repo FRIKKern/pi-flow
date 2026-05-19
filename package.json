@@ -1,0 +1,71 @@
+{
+  "name": "pi-cursor",
+  "version": "0.1.0",
+  "description": "Pi harness: Composer 2.5 via Cursor subscription, MCP on subagents, opinionated scout/research/workflow agents",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "pi-package",
+    "pi",
+    "pi-coding-agent",
+    "cursor",
+    "composer",
+    "mcp",
+    "subagents"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FRIKKern/pi-cursor.git"
+  },
+  "files": [
+    "agents/",
+    "bin/",
+    "extensions/",
+    "prompts/",
+    "settings/",
+    "skills/",
+    "AGENTS.md",
+    "README.md",
+    "LICENSE",
+    "FORKS.md"
+  ],
+  "bin": {
+    "pi-cursor": "./bin/pi-cursor"
+  },
+  "scripts": {
+    "postinstall": "node scripts/verify-bundled-deps.mjs"
+  },
+  "pi": {
+    "image": "https://raw.githubusercontent.com/FRIKKern/pi-cursor/main/assets/logo.svg",
+    "extensions": [
+      "./extensions/pi-cursor-core/index.ts",
+      "node_modules/pi-cursor-provider/index.ts",
+      "node_modules/pi-mcp-adapter/index.ts",
+      "node_modules/pi-subagents/src/extension/index.ts"
+    ],
+    "skills": [
+      "./skills",
+      "node_modules/pi-subagents/skills"
+    ],
+    "prompts": [
+      "./prompts",
+      "node_modules/pi-subagents/prompts"
+    ]
+  },
+  "dependencies": {
+    "pi-cursor-provider": "^0.1.11",
+    "pi-mcp-adapter": "^2.6.1",
+    "pi-subagents": "^0.24.3"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": ">=0.52.10"
+  },
+  "peerDependenciesMeta": {
+    "@earendil-works/pi-coding-agent": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

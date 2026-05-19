@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Launch Pi with the pi-cursor package loaded (dev or global install).
+set -euo pipefail
+
+if ! command -v pi >/dev/null 2>&1; then
+  echo "pi-cursor: install Pi first: npm install -g @earendil-works/pi-coding-agent" >&2
+  exit 1
+fi
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PKG_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# Prefer global install; fall back to package path for development.
+if pi list 2>/dev/null | grep -q 'pi-cursor'; then
+  exec pi "$@"
+fi
+
+exec pi -e "${PKG_ROOT}" "$@"

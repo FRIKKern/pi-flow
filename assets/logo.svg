@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="pi-cursor">
+  <rect width="128" height="128" rx="24" fill="#0f172a"/>
+  <text x="64" y="72" text-anchor="middle" font-family="ui-monospace, monospace" font-size="28" fill="#38bdf8">À</text>
+  <text x="64" y="100" text-anchor="middle" font-family="ui-monospace, monospace" font-size="14" fill="#94a3b8">cursor</text>
+</svg>
