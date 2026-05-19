@@ -54,12 +54,16 @@ if [ -d "$(pwd)/.git" ] || [ -f "$(pwd)/package.json" ]; then
 	fi
 fi
 
-QS_ARGS=()
-[ "$YES" = "1" ] && QS_ARGS=(--yes)
-if curl -fsSL https://raw.githubusercontent.com/FRIKKern/paperflow/main/scripts/quickstart.sh | bash -s -- ${QS_ARGS[@]+"${QS_ARGS[@]}"}; then
+PAPERFLOW_INSTALL="${SCRIPT_DIR:+$SCRIPT_DIR/}install-paperflow-host.sh"
+if [ -z "$SCRIPT_DIR" ] || [ ! -f "$PAPERFLOW_INSTALL" ]; then
+	curl -fsSL "${RAW_BASE}/scripts/install-paperflow-host.sh" -o "${TMPDIR_PF}/install-paperflow-host.sh"
+	PAPERFLOW_INSTALL="${TMPDIR_PF}/install-paperflow-host.sh"
+fi
+
+if [ -f "$PAPERFLOW_INSTALL" ] && bash "$PAPERFLOW_INSTALL"; then
 	info "paperflow host refreshed"
 else
-	warn "paperflow quickstart skipped or failed"
+	warn "paperflow host install skipped or failed"
 fi
 
 cat <<'EOF'

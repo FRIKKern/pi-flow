@@ -63,14 +63,21 @@ if [ -f "$DEPS_SCRIPT" ]; then
 fi
 
 # ── 4. paperflow host ───────────────────────────────────────────────
-PAPERFLOW_QS="https://raw.githubusercontent.com/FRIKKern/paperflow/main/scripts/quickstart.sh"
-QS_ARGS=()
-[ "$YES" = "1" ] && QS_ARGS+=(--yes)
+PAPERFLOW_INSTALL="${SCRIPT_DIR:+$SCRIPT_DIR/}install-paperflow-host.sh"
+if [ -z "$SCRIPT_DIR" ] || [ ! -f "$PAPERFLOW_INSTALL" ]; then
+	PAPERFLOW_INSTALL="${TMPDIR_PF:-}/install-paperflow-host.sh"
+	if [ ! -f "$PAPERFLOW_INSTALL" ]; then
+		TMP_PF_HOST="$(mktemp -d -t pi-flow-pf.XXXXXX)"
+		curl -fsSL "${RAW_BASE}/scripts/install-paperflow-host.sh" -o "$TMP_PF_HOST/install-paperflow-host.sh" \
+			|| PAPERFLOW_INSTALL=""
+		PAPERFLOW_INSTALL="${TMP_PF_HOST}/install-paperflow-host.sh"
+	fi
+fi
 
-if curl -fsSL "$PAPERFLOW_QS" | bash -s -- ${QS_ARGS[@]+"${QS_ARGS[@]}"}; then
+if [ -f "$PAPERFLOW_INSTALL" ] && bash "$PAPERFLOW_INSTALL"; then
 	info "paperflow host installed"
 else
-	warn "paperflow quickstart failed — Pi-only mode still works"
+	warn "paperflow host install failed — Pi-only mode still works"
 fi
 
 # ── 5. cmux (optional) ──────────────────────────────────────────────
