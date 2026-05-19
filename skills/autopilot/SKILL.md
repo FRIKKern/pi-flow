@@ -2,7 +2,7 @@
 name: autopilot
 description: >-
   pi-flow · Chain goal → plan → grill → revise → build → review. Stops before archive.
-argument-hint: "<vision>" [--skip-grill]
+argument-hint: "<vision> [--skip-grill]"
 pipeline: [goal, plan, build, review]
 ---
 
