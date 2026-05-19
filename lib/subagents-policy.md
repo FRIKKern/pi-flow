@@ -15,7 +15,9 @@
 | Subagent | Use when | MCP | May write files |
 |----------|----------|-----|-----------------|
 | `scout` | Repo map, find symbols | Read tools | No |
-| `researcher` | External docs, APIs, web (Browserbase MCP) | Yes | No |
+| `researcher` | External docs, APIs, web (Browserbase MCP) | `read, bash, mcp:browserbase` + `browserbase` skill | No |
+
+**Researcher must have Browserbase tools** — pi-flow `settings/defaults.json` sets `subagents.agentOverrides.researcher.tools` to `read, bash, mcp:browserbase`. Without this, the builtin only gets `web_search` and Browserbase agentstorms appear to "not work". Restart Pi after settings change.
 | `planner` | Implementation plan from approved spec | Optional | No (plan text only) |
 | `worker` | Single work-task implementation | Optional | Yes (scoped) |
 | `reviewer` | Evidence review, ship gate | Read | No |

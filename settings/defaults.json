@@ -22,7 +22,12 @@
     "orchestratorFirst": true,
     "agentOverrides": {
       "scout": { "model": "composer-2.5" },
-      "researcher": { "model": "composer-2.5" },
+      "researcher": {
+        "model": "composer-2.5",
+        "tools": "read, bash, mcp:browserbase",
+        "skills": "browserbase",
+        "inheritSkills": false
+      },
       "planner": { "model": "composer-2.5", "thinking": "high" },
       "worker": { "model": "composer-2.5" },
       "reviewer": { "model": "composer-2.5", "thinking": "high" },
