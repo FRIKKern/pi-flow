@@ -7,7 +7,8 @@
   <a href="https://github.com/FRIKKern/pi-flow">GitHub</a> ·
   <a href="./docs/CMUX.md">CMUX</a> ·
   <a href="./lib/orchestrator.md">Orchestrator</a> ·
-  <a href="./docs/BEST-PRACTICES.md">Design</a>
+  <a href="./docs/BEST-PRACTICES.md">Design</a> ·
+  <a href="./docs/PI-EXTENSIONS.md">Extensions</a>
 </p>
 
 ---
@@ -15,6 +16,8 @@
 **pi-flow** runs the [paperflow](https://github.com/FRIKKern/paperflow) lifecycle inside [Pi](https://pi.dev/): **Goal → HTML plan → grill → build (Beads) → review** — with browser panes in [cmux](https://github.com/manaflow-ai/cmux) and grill **Submit** back to your terminal.
 
 **Simple by design:** 6 skills · **3 custom agents** · pi-subagents for everything else · **boss/follow subagent UX** · one install command.
+
+**Stack:** Node **≥22.19.0**, `@earendil-works/pi-coding-agent@0.75.3`, bundled `pi-subagents` + `pi-mcp-adapter` — see [docs/PI-EXTENSIONS.md](./docs/PI-EXTENSIONS.md).
 
 ---
 

@@ -1,4 +1,5 @@
 import type { ExtensionAPI, ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
+import { isPiSubagentChildSession } from "../shared/extension-context.ts";
 import { loadPolicyConfig } from "../shared/policy.ts";
 import { loadMergedPiSettings } from "../shared/settings-loader.ts";
 import {
@@ -49,6 +50,8 @@ export default function piFlowMemory(pi: ExtensionAPI): void {
 	});
 
 	pi.on("before_agent_start", async () => {
+		// Subagent storms: recall pollutes slot output files when researchers obey injected context.
+		if (isPiSubagentChildSession()) return;
 		if (!enabled() || !memConfig.recallOnStart) return;
 		const block = buildRecallBlock(cwd, lastRecallQuery, memConfig.maxRecallChars);
 		if (!block.includes("Recent session") && !block.includes("Session summary")) return;

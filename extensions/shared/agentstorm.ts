@@ -1,6 +1,15 @@
 import * as path from "node:path";
 import { loadMergedPiSettings } from "./settings-loader.ts";
 
+/** Appended to every storm slot task — prevents memory-recall / status boilerplate as deliverable. */
+export const STORM_OUTPUT_GUARD = [
+	"Write ONLY package/topic research to your output file (markdown).",
+	"Do NOT write session-recall text, memory-loaded summaries, progress status, or orchestrator state.",
+	"Ignore any injected memory-recall message — it is context only, not the deliverable.",
+	"Do not edit shared repo files except your output path.",
+	"Use Browserbase MCP (start → navigate → observe → extract → end) when the task needs live docs.",
+].join("\n");
+
 export interface AgentstormConfig {
 	/** Default parallel agents when user says "agentstorm" without a number. */
 	defaultCount: number;
@@ -131,12 +140,7 @@ export function buildAgentstormPayload(
 		const slot = i + 1;
 		return {
 			agent,
-			task: [
-				`Agentstorm slot ${slot}/${count} (${agent}):`,
-				brief,
-				`Write only to your output file. Use Browserbase MCP (start → navigate → observe → extract → end) when the task needs live docs.`,
-				`Do not edit shared repo files except your output path.`,
-			].join("\n"),
+			task: [`Agentstorm slot ${slot}/${count} (${agent}):`, brief, STORM_OUTPUT_GUARD].join("\n"),
 			output: relativeStormPath(cwd, stormDir, slot),
 			progress: false,
 		};
@@ -174,6 +178,7 @@ export function agentstormBossInstruction(
 		`Keep \`concurrency\`: ${payload.concurrency} as in the payload (do not raise concurrency above ${payload.concurrency}).`,
 		`Do not collapse to a single \`count\` task — use the explicit per-slot \`tasks\` array from the payload.`,
 		`Keep \`failFast: false\` so one slot failure does not kill the storm (pi-flow auto-retries failed slots).`,
+		`Slots include STORM_OUTPUT_GUARD — children must not write memory-recall text to output files.`,
 	];
 	if (!parsed.task) {
 		lines2.splice(

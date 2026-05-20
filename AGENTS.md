@@ -47,7 +47,9 @@ In Pi: `/pi-flow-setup` · `/pi-flow-status` · `/pi-flow-handoff` · `/pi-flow-
 
 ## Docs
 
-`docs/SUBAGENTS-UX.md` · `docs/CMUX.md` · `docs/BROWSERBASE.md` · `docs/BEST-PRACTICES.md` · `docs/EDITING.md` · `docs/BEADS.md` · `docs/HOST.md`
+`docs/PI-EXTENSIONS.md` · `docs/SUBAGENTS-UX.md` · `docs/CMUX.md` · `docs/BROWSERBASE.md` · `docs/BEST-PRACTICES.md` · `docs/EDITING.md` · `docs/BEADS.md` · `docs/HOST.md`
+
+**Runtime:** Node **≥22.19.0** with `@earendil-works/pi-coding-agent@0.75.3` (see `docs/PI-EXTENSIONS.md` for pins).
 
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:7510c1e2 -->
 ## Beads Issue Tracker

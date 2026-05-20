@@ -43,6 +43,8 @@ When the user says **agentstorm** without a number, use **20** slots unless they
 
 **Always** use `/pf-storm …` or `buildAgentstormPayload()` — it emits **one task per slot** with unique `output` under `.pi-flow/browserstorm/<stamp>/slot-NN.md`. Never use a single `count: 20` task with the builtin `researcher` agent (that collides on `research.md` and `progress.md`).
 
+**Output guard:** each slot task includes `STORM_OUTPUT_GUARD` — researchers must write **only** topic research to their output file, not session-recall or memory boilerplate. See `docs/PI-EXTENSIONS.md`.
+
 ```text
 /pf-storm 20 researcher Map docs.browserbase.com — one URL per slot
 ```
@@ -78,4 +80,4 @@ subagent({
 | "50 researchers on …" | `count: 50`, `concurrency: 4` |
 | Small fix / one file | **Do not** agentstorm — single `worker` |
 
-See `lib/subagents-policy.md` and `lib/orchestrator.md`.
+See `lib/subagents-policy.md`, `docs/PI-EXTENSIONS.md`, and `lib/orchestrator.md`.

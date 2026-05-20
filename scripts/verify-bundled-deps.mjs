@@ -3,6 +3,13 @@ import { join } from "node:path";
 
 const root = join(import.meta.dirname, "..");
 
+const [major, minor] = process.versions.node.split(".").map(Number);
+if (major < 22 || (major === 22 && minor < 19)) {
+	console.warn(
+		`pi-flow: Node ${process.versions.node} detected — @earendil-works/pi-coding-agent 0.75.x requires >=22.19.0`,
+	);
+}
+
 const required = [
 	"node_modules/pi-subagents/src/extension/index.ts",
 	"node_modules/pi-mcp-adapter/index.ts",

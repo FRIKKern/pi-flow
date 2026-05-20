@@ -38,7 +38,13 @@ fi
 pi_flow_info "pi-flow quickstart"
 
 if ! command -v node >/dev/null 2>&1; then
-	pi_flow_die "Node.js 20+ required — https://nodejs.org/"
+	pi_flow_die "Node.js 22.19+ required — https://nodejs.org/"
+fi
+NODE_MAJOR="$(node -p "process.versions.node.split('.')[0]" 2>/dev/null || echo 0)"
+NODE_MINOR="$(node -p "process.versions.node.split('.')[1]" 2>/dev/null || echo 0)"
+NODE_PATCH="$(node -p "process.versions.node.split('.')[2]" 2>/dev/null || echo 0)"
+if [ "$NODE_MAJOR" -lt 22 ] || { [ "$NODE_MAJOR" -eq 22 ] && [ "$NODE_MINOR" -lt 19 ]; }; then
+	pi_flow_warn "Pi 0.75.x requires Node >=22.19.0 (current: $(node -v))"
 fi
 
 pi_flow_info "Installing dependencies (beads, jq)…"

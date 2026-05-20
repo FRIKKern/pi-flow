@@ -58,6 +58,8 @@ Merged from `settings/mcp.browserbase.json` into `~/.pi/agent/mcp.json`:
 
 Easiest path — Browserbase hosts the server. See [MCP introduction](https://docs.browserbase.com/integrations/mcp/introduction) and [MCP setup](https://docs.browserbase.com/integrations/mcp/setup). Agent discovery: [llms.txt](https://docs.browserbase.com/llms.txt).
 
+> **Hosted MCP auth:** [setup docs](https://docs.browserbase.com/integrations/mcp/setup.md) show `browserbaseApiKey` on the MCP URL. pi-flow merges a bare URL and loads keys from `browserbase.env`. If tools fail auth, add the query param to `~/.pi/agent/mcp.json` or confirm env is loaded, then `/reload`.
+
 ### Self-hosted stdio
 
 For custom models or flags (`--proxies`, `--keepAlive`, etc.):
@@ -122,6 +124,17 @@ In Pi, delegate to <code>researcher</code> with <code>/skill:browserbase</code> 
 4. Shell: `browse cloud sessions list` — new session appears
 5. `/pi-flow-doctor` — browserbase checks green
 
+## Concurrency and agentstorm
+
+Browserbase enforces plan limits (Free: **3** concurrent browsers). pi-flow agentstorm defaults to **4** parallel researchers — on Free, expect **429** if you exceed 3. Close sessions with MCP `end` when done; each session has a **1-minute minimum** charge.
+
+| Plan | Max concurrent | Creates / minute |
+|------|----------------|------------------|
+| Free | 3 | 5 |
+| Developer | 25 | 25 |
+
+Details: [concurrency overview](https://docs.browserbase.com/optimizations/concurrency/overview.md) · storm notes: [.pi-flow/browserstorm/browserbase-docs/SYNTHESIS.md](../.pi-flow/browserstorm/browserbase-docs/SYNTHESIS.md)
+
 ## Routing with cmux
 
 | URL / task | Tool |
@@ -148,6 +161,10 @@ Full matrix: `lib/browser-routing.md` · skills: `/skill:browserbase` · `/skill
 - Store keys in env or `~/.pi/agent/browserbase.env` only
 - pi-flow policy redacts secrets in tool output when `redactSecrets` is on
 - Do not paste live keys into plans, grills, or git
+
+## Research (browserstorm)
+
+20-slot doc research + synthesis: [.pi-flow/browserstorm/browserbase-docs/](../.pi-flow/browserstorm/browserbase-docs/) · [SYNTHESIS.md](../.pi-flow/browserstorm/browserbase-docs/SYNTHESIS.md)
 
 ## Links
 

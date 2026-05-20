@@ -39,6 +39,8 @@ Invoke: `/pf-storm [count] [agent] <task>` or `/skill:agentstorm`. Pass `count` 
 
 **Never** dispatch `subagent({ tasks: [{ agent: "researcher", count: 20 }] })` — the builtin defaults to `output: research.md` and all slots collide. Use `/pf-storm` / `buildAgentstormPayload()` so each slot writes `.pi-flow/browserstorm/<stamp>/slot-NN.md` with `progress: false`.
 
+**Memory recall:** `pi-flow-memory` does not inject recall into `PI_SUBAGENT_CHILD` sessions (prevents slot files filled with "session recalled" text). Task text includes `STORM_OUTPUT_GUARD` — see `docs/PI-EXTENSIONS.md`.
+
 **Child sessions:** `pi-flow-statusline` and `pi-flow-progress` are disabled when `PI_SUBAGENT_CHILD=1` so deferred UI timers cannot crash parallel researchers after session fork.
 
 **Recovery:** `piFlow.agentstorm.recovery` (defaults on) re-dispatches failed slots after `completion_guard` / run end — up to `maxRetriesPerSlot` (default 2), `failFast: false`, per-slot outputs under `.pi-flow/browserstorm/`.

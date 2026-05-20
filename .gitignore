@@ -1,7 +1,11 @@
 node_modules/
 .pi/
-.pi-flow/browserstorm/
+.pi-flow/browserstorm/*
+!.pi-flow/browserstorm/pi-extensions-2026/
+!.pi-flow/browserstorm/browserbase-docs/
 .pi-flow/storm-runs/
+.pi-flow/subagent-roster.json
+.pi-flow/memory/session/
 *.tgz
 .DS_Store
 .env

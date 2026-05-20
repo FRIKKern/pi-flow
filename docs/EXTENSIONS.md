@@ -1,5 +1,7 @@
 # pi-flow extensions
 
+**Production pins & browserstorm synthesis:** [PI-EXTENSIONS.md](./PI-EXTENSIONS.md)
+
 ## Architecture
 
 ```text

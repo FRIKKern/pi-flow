@@ -1,9 +1,10 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import type {
-	AgentstormSubagentPayload,
-	AgentstormTaskSpec,
+import {
+	STORM_OUTPUT_GUARD,
+	type AgentstormSubagentPayload,
+	type AgentstormTaskSpec,
 } from "./agentstorm.ts";
 import { loadMergedPiSettings } from "./settings-loader.ts";
 
@@ -64,6 +65,9 @@ const RETRYABLE_PATTERNS = [
 	/ECONNRESET/i,
 	/rate\s*limit/i,
 	/\b429\b/,
+	/memory recalled/i,
+	/pi-flow memory recalled/i,
+	/session recalled/i,
 	/timed? out/i,
 	/service unavailable/i,
 	/fetch failed/i,
@@ -230,7 +234,7 @@ export function buildRetryPayload(
 			"",
 			`[pi-flow storm-recovery] Retry ${slot.retries + 1} for slot ${slot.index + 1}. Prior error:`,
 			slot.lastError ?? "(unknown)",
-			"Finish writing to your output file only. Use Browserbase MCP if the task needs live docs.",
+			STORM_OUTPUT_GUARD,
 		].join("\n"),
 		output: slot.output,
 		progress: false,
