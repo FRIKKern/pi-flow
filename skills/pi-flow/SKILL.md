@@ -33,9 +33,9 @@ Read `lib/orchestrator.md` for dispatch rules. **Lazy load:** read each skill's 
 /skill:goal → /skill:plan → grill → revise → /skill:build → /skill:review
 ```
 
-## Agents (only three are pi-flow-specific)
+## Agents (only four are pi-flow-specific)
 
-- `pi-flow.doc-writer` · `pi-flow.bd-keeper` · `pi-flow.cmux-verifier`
+- `pi-flow.doc-writer` · `pi-flow.bd-keeper` · `pi-flow.cmux-verifier` · `pi-flow.chronicler` (compresses session journals → SUMMARY.md, dispatched via `/pf-chronicler`)
 - Everything else: **pi-subagents** builtins (`worker`, `reviewer`, `scout`, …)
 - Follow child chats: `/pf-agents` · `/pf-follow` · `/pf-boss` (`docs/SUBAGENTS-UX.md`)
 

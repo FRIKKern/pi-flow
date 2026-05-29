@@ -16,7 +16,7 @@ pi-flow is a **Pi package** (`pi install git:github.com/FRIKKern/pi-flow`) that 
 | **Optional** | Cursor provider, pi-web-access, pi-intercom, pi-gitnexus, Ollama web | Per environment |
 | **Avoid** | oh-my-pi / mariozechner forks, subagents ≤0.24.0, mcp-adapter 1.x, pi-astro, pi-acp in package.json | — |
 
-**Runtime:** Treat **Node.js ≥ 22.19.0** as the real minimum (Pi 0.75.x); pi-flow still declares `>=20` in `package.json`.
+**Runtime:** **Node.js ≥ 22.19.0** (Pi 0.75.x) — declared as `"node": ">=22.19.0"` in `package.json`.
 
 ---
 

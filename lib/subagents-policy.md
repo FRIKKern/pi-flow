@@ -54,6 +54,7 @@ Subagent `config.json` should set `control.needsAttentionAfterMs`: **180000** (3
 | `pi-flow.doc-writer` | bd mutations, code implementation |
 | `pi-flow.bd-keeper` | HTML authoring, code |
 | `pi-flow.cmux-verifier` | Anything except one-shot verify |
+| `pi-flow.chronicler` | Anything except memory-dir writes (compress journals → SUMMARY + agent MEMORY) |
 
 ## Parallel build
 

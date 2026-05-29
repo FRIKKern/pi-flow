@@ -8,7 +8,7 @@ Adopted patterns from [oh-my-pi](https://github.com/can1357/oh-my-pi) (OMP), sco
 Skills (6)     goal · plan · build · review · autopilot · resume
 Router         pi-flow
 CMUX skills    cmux · cmux-browser (when detected)
-pi-flow agents doc-writer · bd-keeper · cmux-verifier  (3 only)
+pi-flow agents doc-writer · bd-keeper · cmux-verifier · chronicler  (4 only)
 Subagents      worker · reviewer · oracle · planner · scout · researcher
 Host           paperflow-daemon :8767 (external)
 Runtime        policy hooks · streamed rules · /pi-flow-status

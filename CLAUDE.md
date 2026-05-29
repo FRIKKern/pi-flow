@@ -51,20 +51,15 @@ bd close <id>         # Complete work
 <!-- END BEADS INTEGRATION -->
 
 
+## Canonical guide
+
+pi-flow targets the **Pi** CLI, not Claude. **[AGENTS.md](./AGENTS.md) is the canonical guide** — stack, lifecycle, agents, tools, and docs index all live there.
+
 ## Build & Test
 
-_Add your build and test commands here_
-
 ```bash
-# Example:
-# npm install
-# npm test
+npm install                      # installs deps + runs postinstall verify (patch-cursor-provider, verify-bundled-deps)
+npm run verify:install-scripts   # bash scripts/verify-install-scripts.sh
 ```
 
-## Architecture Overview
-
-_Add a brief overview of your project architecture_
-
-## Conventions & Patterns
-
-_Add your project-specific conventions here_
+There is no dedicated build or unit-test script; install + the verify scripts are the gates. For local dev against Pi: `pi -e .` then `/pi-flow-setup`.

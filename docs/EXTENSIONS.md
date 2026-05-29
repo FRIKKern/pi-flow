@@ -7,10 +7,11 @@
 ```text
 pi-flow-setup     settings, agents, subagent config, /pi-flow-setup, live doctor
 pi-flow-host      tools, session register, cmux skills, goal injection
+pi-flow-statusline goal/phase/task footer
+pi-flow-progress  activity signals, LIVE/DEAD spinner, auto-rescue, /pf-activity · /pf-rescue
 pi-flow-subagents boss/follow roster, /pf-* commands, cmux mirror
 pi-flow-memory     session journal, named agents, /pf-recall · /pf-chronicler
 pi-flow-sessions   auto title from first prompt · /pf-rename
-pi-flow-statusline goal/phase/task footer
 extensions/shared paperflow-client, host-manager, beads, subagent-roster, session-memory
 ```
 

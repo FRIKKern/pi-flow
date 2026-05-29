@@ -20,7 +20,7 @@ curl -fsSL https://raw.githubusercontent.com/FRIKKern/pi-flow/main/scripts/insta
 
 | Approach | pi-flow choice |
 |----------|----------------|
-| **`paperflow_beads` tool** | Orchestrator: `ready`, `show`, `init` |
+| **`paperflow_beads` tool** | Orchestrator: `ready`, `show`, `ensure_repo`, `sync_todo` |
 | **`pi-flow.bd-keeper` agent** | All mutations (`create`, `claim`, `close`, `dep`) |
 | **[@edmundmiller/pi-beads](https://www.npmjs.com/package/@edmundmiller/pi-beads)** | Optional — interactive task TUI (`ctrl+x`). Not bundled; overlaps paperflow skills |
 

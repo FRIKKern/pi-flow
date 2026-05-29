@@ -25,7 +25,7 @@
 
 | Design principle | What it means |
 |------------------|---------------|
-| **Simple by design** | 6 lifecycle skills · **3 pi-flow agents** · pi-subagents for everything else |
+| **Simple by design** | 6 lifecycle skills · **4 pi-flow agents** · pi-subagents for everything else |
 | **Boss / follow UX** | Mirror child sessions in cmux — `/pf-follow`, `/pf-boss`, `/pf-watch` |
 | **Dual browser** | cmux `:8767` for paperflow artifacts · Browserbase MCP for the open web |
 | **One install** | Quickstart installs Pi, beads, host, settings, grill bridge — no manual wiring |
@@ -110,13 +110,13 @@ Plans and grills open automatically. Click **Submit** on a grill to send answers
 | [`autopilot`](./skills/autopilot/) | Chain the full lifecycle |
 | [`resume`](./skills/resume/) | Switch active Goal |
 
-**Routers & browser:** [`pi-flow`](./skills/pi-flow/) · [`browserbase`](./skills/browserbase/) · [`cmux-browser`](./skills/cmux-browser/) · [`agentstorm`](./skills/agentstorm/)
+**Routers & browser:** [`pi-flow`](./skills/pi-flow/) · [`browserbase`](./skills/browserbase/) · [`cmux-browser`](./skills-cmux/cmux-browser/) · [`agentstorm`](./skills/agentstorm/)
 
 ### Agents
 
 | Layer | Who |
 |-------|-----|
-| **pi-flow (3)** | `doc-writer` · `bd-keeper` · `cmux-verifier` |
+| **pi-flow (4)** | `doc-writer` · `bd-keeper` · `cmux-verifier` · `chronicler` |
 | **pi-subagents** | `worker` · `reviewer` · `oracle` · `planner` · `scout` · `researcher` |
 | **Follow UX** | `/pf-agents` · `/pf-follow` · `/pf-boss` · `/pf-watch` — [guide](./docs/SUBAGENTS-UX.md) |
 

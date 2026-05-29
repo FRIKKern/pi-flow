@@ -1,6 +1,6 @@
 # pi-flow — paperflow in CMUX
 
-**Simple stack:** 6 lifecycle skills · **3 pi-flow agents** · pi-subagents builtins · external paperflow host.
+**Simple stack:** 6 lifecycle skills · **4 pi-flow agents** · pi-subagents builtins · external paperflow host.
 
 **Activity + auto-rescue:** `pi-flow-progress` tracks usage signals (stream deltas, ctx tokens, tool updates, HTTP). Spinner shows `LIVE` vs `DEAD?`. Rescue runs only when there are **no** meaningful signals for ~90s — then abort, optional compact, auto-resume. `/pf-activity` · `/pf-rescue`. Tune `piFlow.progress`.
 
@@ -14,11 +14,12 @@ Or `/skill:autopilot "vision"`. Router: `/skill:pi-flow` · policy: `lib/orchest
 
 ## Agents
 
-| pi-flow only (3) | Role |
+| pi-flow only (4) | Role |
 |------------------|------|
 | `pi-flow.doc-writer` | HTML artifacts |
 | `pi-flow.bd-keeper` | Beads + pointers |
 | `pi-flow.cmux-verifier` | One-shot doc verify |
+| `pi-flow.chronicler` | Compress journal → SUMMARY.md + agent MEMORY.md (`/pf-chronicler`) |
 
 | pi-subagents (builtins) | Role |
 |-------------------------|------|
